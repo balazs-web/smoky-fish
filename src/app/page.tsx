@@ -5,6 +5,7 @@ import { BenefitsStrip } from "@/components/layout/BenefitsStrip";
 import { CategoryCards } from "@/components/layout/CategoryCards";
 import { FeaturedProducts } from "@/components/layout/FeaturedProducts";
 import { AboutProducts } from "@/components/layout/AboutProducts";
+import { BlogSection } from "@/components/layout/BlogSection";
 import { Button } from "@/components/ui/button";
 import { defaultHeroConfig } from "@/config/heroConfig";
 import { defaultBenefitsConfig } from "@/config/benefitsConfig";
@@ -72,6 +73,7 @@ export default function Home() {
       <CategoryCards />
       <FeaturedProducts />
       <AboutProducts />
+      <BlogSection />
     </div>
   );
 }

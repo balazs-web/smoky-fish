@@ -54,3 +54,39 @@ export interface ProductDoc extends Omit<Product, 'createdAt' | 'updatedAt'> {
   createdAt: unknown;
   updatedAt: unknown;
 }
+
+// Blog types
+export interface BlogPost {
+  id: string;
+  slug: string;
+  title: string;
+  subtitle: string;
+  mainImageUrl: string;
+  content: string; // HTML from WYSIWYG
+  categoryIds: string[]; // links to product categories
+  tags: string[]; // for related content matching
+  publishedAt: Date;
+  isPublished: boolean;
+  readTimeMinutes: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface BlogPostFormData {
+  slug: string;
+  title: string;
+  subtitle: string;
+  mainImageUrl: string;
+  content: string;
+  categoryIds: string[];
+  tags: string[];
+  isPublished: boolean;
+  publishedAt: Date;
+  readTimeMinutes?: number;
+}
+
+export interface BlogPostDoc extends Omit<BlogPost, 'createdAt' | 'updatedAt' | 'publishedAt'> {
+  createdAt: unknown;
+  updatedAt: unknown;
+  publishedAt: unknown;
+}

@@ -343,9 +343,20 @@ export default function MatyiAdminPage() {
           <h1 className="text-lg font-semibold tracking-tight">
             Matyi admin / CRM
           </h1>
-          <p className="text-xs text-neutral-400">
-            Hős szekció beállításai
-          </p>
+          <div className="flex items-center gap-4">
+            <a
+              href="/matyi/store"
+              className="text-xs text-neutral-400 hover:text-[#C89A63] transition-colors"
+            >
+              🏪 Áruház
+            </a>
+            <a
+              href="/matyi/blog"
+              className="text-xs text-neutral-400 hover:text-[#C89A63] transition-colors"
+            >
+              📝 Blog
+            </a>
+          </div>
         </div>
       </header>
 
