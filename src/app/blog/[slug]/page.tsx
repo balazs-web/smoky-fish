@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { Calendar, Clock, ArrowLeft, Share2 } from 'lucide-react';
+import { Calendar, Clock, ArrowLeft, Share2, ArrowRight } from 'lucide-react';
 import { Navbar } from '@/components/layout/Navbar';
 import { getBlogPostBySlug, getRelatedPosts } from '@/lib/blog-service';
 import { getCategories } from '@/lib/store-service';
@@ -42,6 +42,39 @@ function RelatedPostCard({ post }: { post: BlogPost }) {
         </div>
       </article>
     </Link>
+  );
+}
+
+function CategoryPromoBox({ category }: { category: Category }) {
+  return (
+    <div className="mt-12 pt-8 border-t border-gray-200">
+      <Link
+        href={`/kategoria/${category.slug}`}
+        className="group block rounded-2xl bg-gradient-to-br from-[#1B5E4B] to-[#247a61] p-6 sm:p-8 text-white transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex-1">
+            <p className="text-sm font-medium text-white/80 mb-1">
+              Tetszett a cikk?
+            </p>
+            <h3 className="text-xl sm:text-2xl font-bold mb-2">
+              Fedezd fel a {category.name.toLowerCase()} kínálatunkat!
+            </h3>
+            {category.description && (
+              <p className="text-white/90 text-sm sm:text-base line-clamp-2 mt-1">
+                {category.description}
+              </p>
+            )}
+          </div>
+          <div className="flex-shrink-0">
+            <span className="inline-flex items-center gap-2 rounded-lg bg-white px-5 py-3 text-sm font-semibold text-[#1B5E4B] transition-all duration-300 group-hover:gap-3">
+              {category.name} megtekintése
+              <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+            </span>
+          </div>
+        </div>
+      </Link>
+    </div>
   );
 }
 
@@ -266,6 +299,11 @@ export default function BlogPostPage() {
                     ))}
                   </div>
                 </div>
+              )}
+
+              {/* Category Promo Box */}
+              {postCategories.length > 0 && (
+                <CategoryPromoBox category={postCategories[0]} />
               )}
           </div>
         </div>
