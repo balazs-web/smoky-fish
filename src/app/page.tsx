@@ -4,6 +4,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { BenefitsStrip } from "@/components/layout/BenefitsStrip";
 import { CategoryCards } from "@/components/layout/CategoryCards";
 import { FeaturedProducts } from "@/components/layout/FeaturedProducts";
+import { AboutProducts } from "@/components/layout/AboutProducts";
 import { Button } from "@/components/ui/button";
 import { defaultHeroConfig } from "@/config/heroConfig";
 import { defaultBenefitsConfig } from "@/config/benefitsConfig";
@@ -70,6 +71,7 @@ export default function Home() {
       <BenefitsStrip items={benefits.items} color={benefits.color} backgroundColor={benefits.backgroundColor} />
       <CategoryCards />
       <FeaturedProducts />
+      <AboutProducts />
     </div>
   );
 }

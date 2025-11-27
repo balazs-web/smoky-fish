@@ -58,6 +58,7 @@ import {
   saveSiteConfig,
   uploadSiteLogo,
 } from "@/lib/siteService";
+import { AboutProductsAdmin } from "@/components/admin/AboutProductsAdmin";
 
 const heroSchema = z.object({
   eyebrow: z.string().min(1, "Kötelező mező"),
@@ -900,6 +901,8 @@ export default function MatyiAdminPage() {
           </section>
         </main>
       )}
+
+      <AboutProductsAdmin />
     </div>
   );
 }
