@@ -395,7 +395,21 @@ export function BasketSheet({ units = [], storeSettings }: BasketSheetProps) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <Label htmlFor="building">Lépcsőház</Label>
+              <Input
+                id="building"
+                value={shippingAddress.building || ""}
+                onChange={(e) =>
+                  setShippingAddress({
+                    ...shippingAddress,
+                    building: e.target.value,
+                  })
+                }
+                placeholder="A"
+              />
+            </div>
             <div>
               <Label htmlFor="floor">Emelet</Label>
               <Input

@@ -23,6 +23,7 @@ export interface ShippingAddress {
   city: string;
   street: string;
   houseNumber: string;
+  building?: string;
   floor?: string;
   door?: string;
   note?: string;
@@ -64,6 +65,7 @@ const defaultShippingAddress: ShippingAddress = {
   city: "",
   street: "",
   houseNumber: "",
+  building: "",
   floor: "",
   door: "",
   note: "",
