@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AppProviders } from "@/providers/AppProviders";
+import { fetchSiteConfigServer } from "@/lib/siteService.server";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,10 +14,14 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Matyistore | Grúz finomságok Magyarországon",
-  description: "Online webáruház grúz élelmiszerekhez és kézműves termékekhez Magyarországon.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const config = await fetchSiteConfigServer();
+  
+  return {
+    title: config.seoTitle || config.siteTitle || config.storeName,
+    description: config.seoDescription || config.siteTagline,
+  };
+}
 
 export default function RootLayout({
   children,

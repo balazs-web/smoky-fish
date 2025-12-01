@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Minus, Plus, ShoppingCart, Trash2, Package, Loader2, CheckCircle } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Minus, Plus, ShoppingCart, Trash2, Package, Loader2, CheckCircle, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/sheet";
 import { useBasket } from "@/contexts/BasketContext";
 import type { Unit, StoreSettings } from "@/types";
+import { DELIVERY_POSTCODES, getCityFromPostcode } from "@/config/deliveryPostcodes";
 
 interface BasketSheetProps {
   units?: Unit[];
@@ -47,6 +48,27 @@ export function BasketSheet({ units = [], storeSettings }: BasketSheetProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderResult, setOrderResult] = useState<OrderResult | null>(null);
   const [orderError, setOrderError] = useState<string | null>(null);
+
+  // Validate shipping postcode against whitelist
+  const isValidShippingPostcode = useMemo(() => {
+    const postcode = shippingAddress.postalCode;
+    if (!postcode || postcode.length !== 4) return false;
+    return postcode in DELIVERY_POSTCODES;
+  }, [shippingAddress.postalCode]);
+
+  const shippingPostcodeError = useMemo(() => {
+    const postcode = shippingAddress.postalCode;
+    if (!postcode) return null;
+    if (postcode.length === 4 && !isValidShippingPostcode) {
+      return "Erre az irányítószámra nem szállítunk. Csak Budapest és Pest megye területére szállítunk.";
+    }
+    return null;
+  }, [shippingAddress.postalCode, isValidShippingPostcode]);
+
+  // Auto-populate city from postcode
+  const autoPopulatedCity = useMemo(() => {
+    return getCityFromPostcode(shippingAddress.postalCode);
+  }, [shippingAddress.postalCode]);
 
   const formatPrice = (priceInCents: number): string => {
     return (priceInCents / 100).toLocaleString("hu-HU");
@@ -84,6 +106,12 @@ export function BasketSheet({ units = [], storeSettings }: BasketSheetProps) {
         !shippingAddress.postalCode || !shippingAddress.city || !shippingAddress.street ||
         !shippingAddress.houseNumber) {
       setOrderError("Kérlek töltsd ki az összes kötelező mezőt a szállítási adatoknál!");
+      return;
+    }
+
+    // Validate shipping postcode for delivery area
+    if (!isValidShippingPostcode) {
+      setOrderError("Erre az irányítószámra nem szállítunk. Csak Budapest és Pest megye területére szállítunk.");
       return;
     }
 
@@ -235,6 +263,19 @@ export function BasketSheet({ units = [], storeSettings }: BasketSheetProps) {
       <div className="space-y-4">
         <h3 className="font-semibold text-gray-900 mb-4">Szállítási adatok</h3>
 
+        {/* Delivery area notice */}
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
+          <div className="flex items-start gap-2">
+            <MapPin className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-amber-800">Szállítási terület</p>
+              <p className="text-xs text-amber-700 mt-0.5">
+                Jelenleg csak Budapest és Pest megye területére szállítunk. Az irányítószám alapján automatikusan ellenőrizzük, hogy szállítunk-e a címre, és kitöltjük a település nevét.
+              </p>
+            </div>
+          </div>
+        </div>
+
         <div className="space-y-3">
           <div>
             <Label htmlFor="name">Név *</Label>
@@ -287,29 +328,39 @@ export function BasketSheet({ units = [], storeSettings }: BasketSheetProps) {
               <Input
                 id="postalCode"
                 value={shippingAddress.postalCode}
-                onChange={(e) =>
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, ""); // Only digits
+                  const city = getCityFromPostcode(value);
                   setShippingAddress({
                     ...shippingAddress,
-                    postalCode: e.target.value,
-                  })
-                }
-                placeholder="1234"
+                    postalCode: value,
+                    city: city || "", // Auto-populate or clear city
+                  });
+                }}
+                placeholder="pl. 1052, 2000"
                 maxLength={4}
+                className={shippingPostcodeError ? "border-red-500 focus-visible:ring-red-500" : isValidShippingPostcode ? "border-green-500 focus-visible:ring-green-500" : ""}
               />
+              {shippingPostcodeError && (
+                <p className="text-xs text-red-500 mt-1">{shippingPostcodeError}</p>
+              )}
+              {isValidShippingPostcode && (
+                <p className="text-xs text-green-600 mt-1">✓ Szállítunk erre a címre</p>
+              )}
             </div>
             <div>
               <Label htmlFor="city">Város *</Label>
               <Input
                 id="city"
-                value={shippingAddress.city}
-                onChange={(e) =>
-                  setShippingAddress({
-                    ...shippingAddress,
-                    city: e.target.value,
-                  })
-                }
-                placeholder="Budapest"
+                value={autoPopulatedCity || shippingAddress.city}
+                readOnly
+                disabled={!!autoPopulatedCity}
+                placeholder="Adja meg az irányítószámot"
+                className={autoPopulatedCity ? "bg-gray-100 cursor-not-allowed" : ""}
               />
+              {autoPopulatedCity && (
+                <p className="text-xs text-gray-500 mt-1">Automatikusan kitöltve</p>
+              )}
             </div>
           </div>
 

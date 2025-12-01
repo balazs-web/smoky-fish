@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendOrderEmails, type OrderData } from "@/lib/email-service";
+import { DELIVERY_POSTCODES } from "@/config/deliveryPostcodes";
 
 // Generate a unique order ID
 function generateOrderId(): string {
@@ -25,6 +26,15 @@ export async function POST(request: NextRequest) {
     if (!shippingAddress?.name || !shippingAddress?.email || !shippingAddress?.phone) {
       return NextResponse.json(
         { error: "Hiányzó szállítási adatok" },
+        { status: 400 }
+      );
+    }
+
+    // Validate shipping postcode against allowed delivery areas
+    const shippingPostcode = shippingAddress?.postalCode;
+    if (!shippingPostcode || shippingPostcode.length !== 4 || !(shippingPostcode in DELIVERY_POSTCODES)) {
+      return NextResponse.json(
+        { error: "Erre az irányítószámra nem szállítunk. Csak Budapest és Pest megye területére szállítunk." },
         { status: 400 }
       );
     }
