@@ -2,9 +2,10 @@
 
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
-import { ArrowRight, FolderOpen } from 'lucide-react';
+import { ArrowRight, FolderOpen, Package } from 'lucide-react';
 import { getCategories } from '@/lib/store-service';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 
 export function CategoryCards() {
   const { data: allCategories = [], isLoading } = useQuery({
@@ -57,49 +58,64 @@ export function CategoryCards() {
 
   return (
     <section className="bg-[#F5F3EF] py-16 px-4 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl flex justify-center">
-        <div className={cn('grid gap-6 w-full mx-auto', getGridClass(categories.length))}>
-          {categories.map((category) => (
-            <Link
-              key={category.id}
-              href={`/kategoria/${category.slug}`}
-              className="group relative block aspect-[4/3] overflow-hidden rounded-2xl bg-gray-100 shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
-            >
-              {/* Background Image */}
-              {category.imageUrl ? (
-                <img
-                  src={category.imageUrl}
-                  alt={category.name}
-                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-              ) : (
-                <div className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300" />
-              )}
+      <div className="mx-auto max-w-7xl">
+        {/* Section Header with All Products Button */}
+        <div className="flex flex-col sm:flex-row items-center justify-between mb-10 gap-4">
+          <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">Kategóriák</h2>
+          <Link href="/termekek">
+            <Button className="bg-[#C89A63] hover:bg-[#b8864f] text-black gap-2">
+              <Package className="h-4 w-4" />
+              Összes termék
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </Link>
+        </div>
 
-              {/* Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-
-              {/* Content */}
-              <div className="absolute inset-0 flex flex-col justify-end p-6">
-                <h3 className="text-xl font-bold text-white sm:text-2xl">
-                  {category.name}
-                </h3>
-                {category.description && (
-                  <p className="mt-1 text-sm text-white/80 line-clamp-2">
-                    {category.description}
-                  </p>
+        {/* Categories Grid */}
+        <div className="flex justify-center">
+          <div className={cn('grid gap-6 w-full mx-auto', getGridClass(categories.length))}>
+            {categories.map((category) => (
+              <Link
+                key={category.id}
+                href={`/kategoria/${category.slug}`}
+                className="group relative block aspect-[4/3] overflow-hidden rounded-2xl bg-gray-100 shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
+              >
+                {/* Background Image */}
+                {category.imageUrl ? (
+                  <img
+                    src={category.imageUrl}
+                    alt={category.name}
+                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300" />
                 )}
 
-                {/* Button */}
-                <div className="mt-4">
-                  <span className="inline-flex items-center gap-2 rounded-lg bg-[#1B5E4B] px-4 py-2 text-sm font-medium text-white transition-all duration-300 group-hover:bg-[#247a61] group-hover:gap-3">
+                {/* Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+
+                {/* Content */}
+                <div className="absolute inset-0 flex flex-col justify-end p-6">
+                  <h3 className="text-xl font-bold text-white sm:text-2xl">
                     {category.name}
-                    <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-                  </span>
+                  </h3>
+                  {category.description && (
+                    <p className="mt-1 text-sm text-white/80 line-clamp-2">
+                      {category.description}
+                    </p>
+                  )}
+
+                  {/* Button */}
+                  <div className="mt-4">
+                    <span className="inline-flex items-center gap-2 rounded-lg bg-[#1B5E4B] px-4 py-2 text-sm font-medium text-white transition-all duration-300 group-hover:bg-[#247a61] group-hover:gap-3">
+                      {category.name}
+                      <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                    </span>
+                  </div>
                 </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </section>

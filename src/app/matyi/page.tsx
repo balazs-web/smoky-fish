@@ -100,6 +100,12 @@ const siteSchema = z.object({
   facebookUrl: z.string().url("Érvényes URL szükséges").or(z.literal("")).optional(),
   instagramUrl: z.string().url("Érvényes URL szükséges").or(z.literal("")).optional(),
   phoneNumber: z.string().optional(),
+  // Footer fields
+  contactEmail: z.string().email("Érvényes e-mail szükséges").or(z.literal("")).optional(),
+  wholesaleEmail: z.string().email("Érvényes e-mail szükséges").or(z.literal("")).optional(),
+  supportEmail: z.string().email("Érvényes e-mail szükséges").or(z.literal("")).optional(),
+  footerStoreName: z.string().optional(),
+  footerTagline: z.string().optional(),
 });
 
 type SiteFormValues = z.infer<typeof siteSchema>;
@@ -355,6 +361,12 @@ export default function MatyiAdminPage() {
               className="text-xs text-neutral-400 hover:text-[#C89A63] transition-colors"
             >
               📝 Blog
+            </a>
+            <a
+              href="/matyi/legal"
+              className="text-xs text-neutral-400 hover:text-[#C89A63] transition-colors"
+            >
+              📄 Jogi oldalak
             </a>
           </div>
         </div>
@@ -893,6 +905,72 @@ export default function MatyiAdminPage() {
                     <p className="text-[10px] text-neutral-500">
                       A navbar-ban megjelenik, kattintható híváskezdeményezéssel.
                     </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t border-neutral-800 pt-4">
+                <h3 className="mb-3 text-xs font-semibold text-neutral-300">
+                  Lábléc (Footer) beállítások
+                </h3>
+
+                <div className="space-y-3">
+                  <div className="space-y-1">
+                    <label className="block text-xs font-medium text-neutral-200">
+                      Lábléc - Üzlet neve
+                    </label>
+                    <input
+                      placeholder="Prémium Élelmiszer"
+                      className="w-full rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-xs outline-none focus:border-[#C89A63]"
+                      {...registerSite("footerStoreName")}
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="block text-xs font-medium text-neutral-200">
+                      Lábléc - Szlogen
+                    </label>
+                    <input
+                      placeholder="Kiváló minőség egyenesen a gyártótól az asztalra."
+                      className="w-full rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-xs outline-none focus:border-[#C89A63]"
+                      {...registerSite("footerTagline")}
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="block text-xs font-medium text-neutral-200">
+                      Kapcsolat e-mail (info@)
+                    </label>
+                    <input
+                      type="email"
+                      placeholder="info@example.hu"
+                      className="w-full rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-xs outline-none focus:border-[#C89A63]"
+                      {...registerSite("contactEmail")}
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="block text-xs font-medium text-neutral-200">
+                      Nagyker e-mail (nagyker@)
+                    </label>
+                    <input
+                      type="email"
+                      placeholder="nagyker@example.hu"
+                      className="w-full rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-xs outline-none focus:border-[#C89A63]"
+                      {...registerSite("wholesaleEmail")}
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="block text-xs font-medium text-neutral-200">
+                      Reklamáció e-mail (reklamacio@)
+                    </label>
+                    <input
+                      type="email"
+                      placeholder="reklamacio@example.hu"
+                      className="w-full rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-xs outline-none focus:border-[#C89A63]"
+                      {...registerSite("supportEmail")}
+                    />
                   </div>
                 </div>
               </div>

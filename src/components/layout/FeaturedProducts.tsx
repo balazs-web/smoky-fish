@@ -1,11 +1,18 @@
 'use client';
 
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import Link from 'next/link';
 import { Package } from 'lucide-react';
 import { getProducts, getUnits } from '@/lib/store-service';
 import { Button } from '@/components/ui/button';
+import { AddToBasketModal } from '@/components/basket/AddToBasketModal';
+import type { Product, Unit } from '@/types';
 
 export function FeaturedProducts() {
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const { data: allProducts = [], isLoading: productsLoading } = useQuery({
     queryKey: ['products'],
     queryFn: getProducts,
@@ -18,6 +25,15 @@ export function FeaturedProducts() {
 
   // Filter featured and active products
   const featuredProducts = allProducts.filter((p) => p.isFeatured && p.isActive);
+
+  const handleAddToBasket = (product: Product) => {
+    setSelectedProduct(product);
+    setIsModalOpen(true);
+  };
+
+  const getUnit = (unitId: string): Unit | undefined => {
+    return units.find((u) => u.id === unitId);
+  };
 
   const getUnitName = (unitId: string): string => {
     const unit = units.find((u) => u.id === unitId);
@@ -77,26 +93,30 @@ export function FeaturedProducts() {
                 key={product.id}
                 className="group bg-[#F5F3EF] rounded-2xl overflow-hidden shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
               >
-                {/* Product Image */}
-                <div className="aspect-square overflow-hidden bg-gray-100">
-                  {imageUrl ? (
-                    <img
-                      src={imageUrl}
-                      alt={product.name}
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                  ) : (
-                    <div className="h-full w-full flex items-center justify-center">
-                      <Package className="h-12 w-12 text-gray-300" />
-                    </div>
-                  )}
-                </div>
+                {/* Product Image - Clickable */}
+                <Link href={`/termek/${product.slug}`}>
+                  <div className="aspect-square overflow-hidden bg-gray-100">
+                    {imageUrl ? (
+                      <img
+                        src={imageUrl}
+                        alt={product.name}
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="h-full w-full flex items-center justify-center">
+                        <Package className="h-12 w-12 text-gray-300" />
+                      </div>
+                    )}
+                  </div>
+                </Link>
 
                 {/* Product Info */}
                 <div className="p-4">
-                  <h3 className="text-sm font-medium text-gray-900 line-clamp-2 min-h-[40px]">
-                    {product.name}
-                  </h3>
+                  <Link href={`/termek/${product.slug}`}>
+                    <h3 className="text-sm font-medium text-gray-900 line-clamp-2 min-h-[40px] hover:text-[#1B5E4B] transition-colors">
+                      {product.name}
+                    </h3>
+                  </Link>
                   
                   {/* Price */}
                   <div className="mt-2 mb-4">
@@ -113,6 +133,7 @@ export function FeaturedProducts() {
                   {/* Add to Cart Button */}
                   <Button 
                     className="w-full bg-[#1B5E4B] hover:bg-[#247a61] text-white"
+                    onClick={() => handleAddToBasket(product)}
                   >
                     Kosárba
                   </Button>
@@ -122,6 +143,17 @@ export function FeaturedProducts() {
           })}
         </div>
       </div>
+
+      {/* Add to Basket Modal */}
+      <AddToBasketModal
+        product={selectedProduct}
+        unit={selectedProduct?.unitId ? getUnit(selectedProduct.unitId) : undefined}
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedProduct(null);
+        }}
+      />
     </section>
   );
 }

@@ -90,3 +90,11 @@ export interface BlogPostDoc extends Omit<BlogPost, 'createdAt' | 'updatedAt' | 
   updatedAt: unknown;
   publishedAt: unknown;
 }
+
+// Store Settings
+export interface StoreSettings {
+  id: string;
+  shippingCost: number; // in cents
+  freeShippingThreshold?: number; // in cents, optional - free shipping above this amount
+  updatedAt: Date;
+}

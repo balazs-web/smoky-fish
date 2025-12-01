@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Package, FolderTree, LayoutDashboard, ArrowLeft, Ruler } from 'lucide-react';
+import { Package, FolderTree, LayoutDashboard, ArrowLeft, Ruler, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navItems = [
@@ -10,6 +10,7 @@ const navItems = [
   { href: '/matyi/store/products', label: 'Products', icon: Package },
   { href: '/matyi/store/categories', label: 'Categories', icon: FolderTree },
   { href: '/matyi/store/units', label: 'Units', icon: Ruler },
+  { href: '/matyi/store/settings', label: 'Beállítások', icon: Settings },
 ];
 
 export default function StoreAdminLayout({

@@ -6,6 +6,7 @@ import { CategoryCards } from "@/components/layout/CategoryCards";
 import { FeaturedProducts } from "@/components/layout/FeaturedProducts";
 import { AboutProducts } from "@/components/layout/AboutProducts";
 import { BlogSection } from "@/components/layout/BlogSection";
+import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { defaultHeroConfig } from "@/config/heroConfig";
 import { defaultBenefitsConfig } from "@/config/benefitsConfig";
@@ -39,7 +40,7 @@ export default function Home() {
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black via-black/80 to-black/40" />
 
-        <section className="relative mx-auto flex min-h-[70vh] max-w-6xl flex-col justify-center px-4 py-16 sm:px-6 lg:px-8">
+        <section id="fooldal" className="relative mx-auto flex min-h-[70vh] max-w-6xl flex-col justify-center px-4 py-16 sm:px-6 lg:px-8">
           <div className="max-w-2xl space-y-6">
             <p className="text-xs font-medium tracking-[0.25em] text-[#C89A63] uppercase">
               {hero.eyebrow}
@@ -70,10 +71,20 @@ export default function Home() {
       </main>
 
       <BenefitsStrip items={benefits.items} color={benefits.color} backgroundColor={benefits.backgroundColor} />
-      <CategoryCards />
-      <FeaturedProducts />
-      <AboutProducts />
-      <BlogSection />
+      <div id="kategoriak">
+        <CategoryCards />
+      </div>
+      <div id="termekek">
+        <FeaturedProducts />
+      </div>
+      <div id="rolunk">
+        <AboutProducts />
+      </div>
+      <div id="blog">
+        <BlogSection />
+      </div>
+
+      <Footer />
     </div>
   );
 }

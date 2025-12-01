@@ -7,6 +7,13 @@ export type SiteConfig = {
   facebookUrl?: string;
   instagramUrl?: string;
   phoneNumber?: string;
+  // Footer contact emails
+  contactEmail?: string;
+  wholesaleEmail?: string;
+  supportEmail?: string;
+  // Footer store info
+  footerStoreName?: string;
+  footerTagline?: string;
 };
 
 export const defaultSiteConfig: SiteConfig = {
@@ -19,4 +26,9 @@ export const defaultSiteConfig: SiteConfig = {
   facebookUrl: "",
   instagramUrl: "",
   phoneNumber: "",
+  contactEmail: "",
+  wholesaleEmail: "",
+  supportEmail: "",
+  footerStoreName: "Prémium Élelmiszer",
+  footerTagline: "Kiváló minőség egyenesen a gyártótól az asztalra.",
 };

@@ -155,8 +155,8 @@ export default function ProductsPage() {
       slug: '',
       description: '',
       price: 0,
-      categoryId: categories[0]?.id || '',
-      unitId: units[0]?.id || '',
+      categoryId: '', // Force user to select a category
+      unitId: '', // Force user to select a unit
       imageUrl: '',
       isFeatured: false,
       isActive: true,
@@ -262,6 +262,9 @@ export default function ProductsPage() {
     return unit?.name || '';
   };
 
+  const activeCategories = categories.filter((c) => c.isActive);
+  const activeUnits = units.filter((u) => u.isActive);
+
   const filteredProducts =
     filterCategory === 'all'
       ? products
@@ -277,21 +280,21 @@ export default function ProductsPage() {
           <h2 className="text-2xl font-bold text-gray-900">Products</h2>
           <p className="text-gray-600 mt-1">Manage your store products</p>
         </div>
-        <Button onClick={handleOpenCreate} disabled={categories.length === 0 || units.length === 0}>
+        <Button onClick={handleOpenCreate} disabled={activeCategories.length === 0 || activeUnits.length === 0}>
           <Plus className="w-4 h-4 mr-2" />
           Add Product
         </Button>
       </div>
 
-      {(categories.length === 0 || units.length === 0) && !categoriesLoading && !unitsLoading && (
+      {(activeCategories.length === 0 || activeUnits.length === 0) && !categoriesLoading && !unitsLoading && (
         <Card className="border-yellow-200 bg-yellow-50">
           <CardContent className="py-4">
             <p className="text-yellow-800">
-              {categories.length === 0 && units.length === 0
-                ? 'You need to create at least one category and one unit before adding products.'
-                : categories.length === 0
-                ? 'You need to create at least one category before adding products.'
-                : 'You need to create at least one unit before adding products.'}
+              {activeCategories.length === 0 && activeUnits.length === 0
+                ? 'You need to create at least one active category and one active unit before adding products.'
+                : activeCategories.length === 0
+                ? 'You need to create at least one active category before adding products.'
+                : 'You need to create at least one active unit before adding products.'}
             </p>
           </CardContent>
         </Card>
@@ -321,7 +324,7 @@ export default function ProductsPage() {
             <div className="text-center py-8">
               <Package className="w-12 h-12 text-gray-300 mx-auto mb-4" />
               <p className="text-gray-500">No products found</p>
-              {categories.length > 0 && (
+              {activeCategories.length > 0 && activeUnits.length > 0 && (
                 <Button variant="link" onClick={handleOpenCreate}>
                   Create your first product
                 </Button>
@@ -500,16 +503,18 @@ export default function ProductsPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="categoryId">Category</Label>
+                <Label htmlFor="categoryId" className="flex items-center gap-1">
+                  Category <span className="text-red-500">*</span>
+                </Label>
                 <Select
                   value={form.watch('categoryId')}
-                  onValueChange={(value) => form.setValue('categoryId', value)}
+                  onValueChange={(value) => form.setValue('categoryId', value, { shouldValidate: true })}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a category" />
+                  <SelectTrigger className={form.formState.errors.categoryId ? 'border-red-500' : ''}>
+                    <SelectValue placeholder="Válassz kategóriát..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {categories.map((category) => (
+                    {categories.filter(c => c.isActive).map((category) => (
                       <SelectItem key={category.id} value={category.id}>
                         {category.name}
                       </SelectItem>
@@ -524,13 +529,15 @@ export default function ProductsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="unitId">Unit</Label>
+                <Label htmlFor="unitId" className="flex items-center gap-1">
+                  Unit <span className="text-red-500">*</span>
+                </Label>
                 <Select
                   value={form.watch('unitId')}
-                  onValueChange={(value) => form.setValue('unitId', value)}
+                  onValueChange={(value) => form.setValue('unitId', value, { shouldValidate: true })}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a unit" />
+                  <SelectTrigger className={form.formState.errors.unitId ? 'border-red-500' : ''}>
+                    <SelectValue placeholder="Válassz egységet..." />
                   </SelectTrigger>
                   <SelectContent>
                     {units.filter(u => u.isActive).map((unit) => (

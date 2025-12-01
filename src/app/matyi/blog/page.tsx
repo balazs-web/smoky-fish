@@ -309,7 +309,7 @@ export default function BlogAdminPage() {
                     control={control}
                     render={({ field }) => (
                       <RichTextEditor
-                        value={field.value}
+                        value={field.value || ''}
                         onChange={field.onChange}
                         placeholder="Kezdj el írni..."
                       />
@@ -378,7 +378,7 @@ export default function BlogAdminPage() {
                           <label
                             key={cat.id}
                             className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs cursor-pointer transition-colors ${
-                              field.value.includes(cat.id)
+                              (field.value || []).includes(cat.id)
                                 ? 'bg-[#1B5E4B] text-white'
                                 : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
                             }`}
@@ -386,12 +386,13 @@ export default function BlogAdminPage() {
                             <input
                               type="checkbox"
                               className="hidden"
-                              checked={field.value.includes(cat.id)}
+                              checked={(field.value || []).includes(cat.id)}
                               onChange={(e) => {
+                                const currentValue = field.value || [];
                                 if (e.target.checked) {
-                                  field.onChange([...field.value, cat.id]);
+                                  field.onChange([...currentValue, cat.id]);
                                 } else {
-                                  field.onChange(field.value.filter((id: string) => id !== cat.id));
+                                  field.onChange(currentValue.filter((id: string) => id !== cat.id));
                                 }
                               }}
                             />

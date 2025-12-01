@@ -6,13 +6,14 @@ import {
   addDoc,
   updateDoc,
   deleteDoc,
+  setDoc,
   query,
   where,
   orderBy,
   Timestamp,
 } from 'firebase/firestore';
 import { db } from './firebase';
-import type { Product, Category, Unit, ProductFormData, CategoryFormData, UnitFormData } from '@/types';
+import type { Product, Category, Unit, ProductFormData, CategoryFormData, UnitFormData, StoreSettings } from '@/types';
 
 // Helper to convert Firestore Timestamp to Date
 const toDate = (timestamp: unknown): Date => {
@@ -270,4 +271,37 @@ export async function updateProduct(id: string, data: Partial<ProductFormData>):
 export async function deleteProduct(id: string): Promise<void> {
   const docRef = doc(db, 'products', id);
   await deleteDoc(docRef);
+}
+
+// ============ STORE SETTINGS ============
+
+const SETTINGS_DOC_ID = 'store-settings';
+
+export async function getStoreSettings(): Promise<StoreSettings> {
+  const docRef = doc(db, 'settings', SETTINGS_DOC_ID);
+  const snapshot = await getDoc(docRef);
+  
+  if (!snapshot.exists()) {
+    // Return default settings if not set
+    return {
+      id: SETTINGS_DOC_ID,
+      shippingCost: 99000, // Default 990 Ft in cents
+      freeShippingThreshold: undefined,
+      updatedAt: new Date(),
+    };
+  }
+  
+  return {
+    id: snapshot.id,
+    ...snapshot.data(),
+    updatedAt: toDate(snapshot.data().updatedAt),
+  } as StoreSettings;
+}
+
+export async function updateStoreSettings(data: Partial<Omit<StoreSettings, 'id' | 'updatedAt'>>): Promise<void> {
+  const docRef = doc(db, 'settings', SETTINGS_DOC_ID);
+  await setDoc(docRef, {
+    ...data,
+    updatedAt: Timestamp.now(),
+  }, { merge: true });
 }
