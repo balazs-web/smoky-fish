@@ -2,6 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowRight, FolderOpen, Package } from 'lucide-react';
 import { getCategories } from '@/lib/store-service';
 import { cn } from '@/lib/utils';
@@ -82,10 +83,12 @@ export function CategoryCards() {
               >
                 {/* Background Image */}
                 {category.imageUrl ? (
-                  <img
+                  <Image
                     src={category.imageUrl}
                     alt={category.name}
-                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   />
                 ) : (
                   <div className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300" />

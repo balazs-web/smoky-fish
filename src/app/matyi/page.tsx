@@ -92,6 +92,7 @@ const benefitsSchema = z.object({
 type BenefitsFormValues = z.infer<typeof benefitsSchema>;
 
 const siteSchema = z.object({
+  storeName: z.string().min(1, "Kötelező mező"),
   siteTitle: z.string().min(1, "Kötelező mező"),
   siteTagline: z.string().min(1, "Kötelező mező"),
   logoImageUrl: z.string().min(1, "Kötelező mező"),
@@ -782,7 +783,23 @@ export default function MatyiAdminPage() {
             >
               <div className="space-y-1">
                 <label className="block text-xs font-medium text-neutral-200">
-                  Oldal címe
+                  Bolt neve
+                </label>
+                <input
+                  placeholder="Matyistore"
+                  className="w-full rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-xs outline-none focus:border-[#C89A63]"
+                  {...registerSite("storeName")}
+                />
+                {siteErrors.storeName && (
+                  <p className="text-xs text-red-400">
+                    {siteErrors.storeName.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-1">
+                <label className="block text-xs font-medium text-neutral-200">
+                  Oldal címe (SEO)
                 </label>
                 <input
                   className="w-full rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-xs outline-none focus:border-[#C89A63]"

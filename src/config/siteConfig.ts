@@ -1,4 +1,5 @@
 export type SiteConfig = {
+  storeName: string;
   siteTitle: string;
   siteTagline: string;
   logoImageUrl: string;
@@ -17,6 +18,7 @@ export type SiteConfig = {
 };
 
 export const defaultSiteConfig: SiteConfig = {
+  storeName: "Matyistore",
   siteTitle: "Matyistore – Prémium füstölt lazac, sajtok és grúz borok",
   siteTagline: "Kézműves füstölt különlegességek és eredeti grúz borok Budapesten és Pest megyében.",
   logoImageUrl: "",

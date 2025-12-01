@@ -33,7 +33,7 @@ export function Footer() {
   const supportEmail = siteConfig?.supportEmail || '';
   const facebookUrl = siteConfig?.facebookUrl || '';
   const instagramUrl = siteConfig?.instagramUrl || '';
-  const siteTitle = siteConfig?.siteTitle || 'Matyistore';
+  const storeName = siteConfig?.storeName || 'Matyistore';
 
   // Navigation links - same as navbar
   const navLinks = [
@@ -193,7 +193,7 @@ export function Footer() {
         <div className="border-t border-black/10">
           <div className="mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
             <p className="text-center text-sm text-black/60">
-              © {currentYear} {siteTitle.split('–')[0].trim()}. Minden jog fenntartva.
+              © {currentYear} {storeName}. Minden jog fenntartva.
             </p>
           </div>
         </div>

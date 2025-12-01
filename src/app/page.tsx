@@ -8,6 +8,7 @@ import { AboutProducts } from "@/components/layout/AboutProducts";
 import { BlogSection } from "@/components/layout/BlogSection";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 import { defaultHeroConfig } from "@/config/heroConfig";
 import { defaultBenefitsConfig } from "@/config/benefitsConfig";
 import { useQuery } from "@tanstack/react-query";
@@ -34,10 +35,16 @@ export default function Home() {
     <div className="min-h-screen bg-black text-white">
       <Navbar />
       <main className="relative isolate overflow-hidden">
-        <div
-          className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-60"
-          style={{ backgroundImage: `url(${hero.backgroundImageUrl})` }}
-        />
+        {hero.backgroundImageUrl && (
+          <Image
+            src={hero.backgroundImageUrl}
+            alt="Hero background"
+            fill
+            className="pointer-events-none object-cover opacity-60"
+            priority
+            sizes="100vw"
+          />
+        )}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black via-black/80 to-black/40" />
 
         <section id="fooldal" className="relative mx-auto flex min-h-[70vh] max-w-6xl flex-col justify-center px-4 py-16 sm:px-6 lg:px-8">

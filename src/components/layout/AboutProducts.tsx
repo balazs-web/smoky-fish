@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
 import { 
   Fish, 
@@ -55,10 +56,12 @@ export function AboutProducts() {
       {/* Section 1: Hero */}
       <section className="relative bg-[#1a1a1a] text-white overflow-hidden">
         {config.hero.imageUrl ? (
-          <img 
+          <Image 
             src={config.hero.imageUrl} 
             alt={config.hero.title}
-            className="absolute inset-0 w-full h-full object-cover opacity-40"
+            fill
+            className="object-cover opacity-40"
+            priority
           />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-[#2a2a2a] to-[#1a1a1a]" />
@@ -90,12 +93,14 @@ export function AboutProducts() {
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
             {/* Image */}
-            <div className="aspect-[4/3] rounded-2xl overflow-hidden">
+            <div className="relative aspect-[4/3] rounded-2xl overflow-hidden">
               {config.naturalProduct.imageUrl ? (
-                <img 
+                <Image 
                   src={config.naturalProduct.imageUrl} 
                   alt={config.naturalProduct.title}
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
                 />
               ) : (
                 <ImagePlaceholder className="w-full h-full rounded-2xl" />
@@ -135,12 +140,14 @@ export function AboutProducts() {
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
             {/* Image */}
-            <div className="aspect-[4/3] rounded-2xl overflow-hidden">
+            <div className="relative aspect-[4/3] rounded-2xl overflow-hidden">
               {config.coldSmoking.imageUrl ? (
-                <img 
+                <Image 
                   src={config.coldSmoking.imageUrl} 
                   alt={config.coldSmoking.title}
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
                 />
               ) : (
                 <ImagePlaceholder className="w-full h-full rounded-2xl" />
@@ -177,9 +184,9 @@ export function AboutProducts() {
               >
                 {/* Image */}
                 <div className="w-full md:w-1/2">
-                  <div className="aspect-video rounded-xl overflow-hidden">
+                  <div className="relative aspect-video rounded-xl overflow-hidden">
                     {step.imageUrl ? (
-                      <img src={step.imageUrl} alt={step.title} className="w-full h-full object-cover" />
+                      <Image src={step.imageUrl} alt={step.title} fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
                     ) : (
                       <ImagePlaceholder className="w-full h-full" />
                     )}
@@ -220,10 +227,12 @@ export function AboutProducts() {
                 {/* Background Image with Smoky Reveal */}
                 {item.imageUrl && (
                   <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 ease-in-out">
-                    <img 
+                    <Image 
                       src={item.imageUrl} 
                       alt={item.title}
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                     />
                     {/* Smoky overlay gradient */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
@@ -268,9 +277,9 @@ export function AboutProducts() {
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {config.premiumPackaging.images.map((img, idx) => (
-              <div key={idx} className="aspect-square rounded-xl overflow-hidden">
+              <div key={idx} className="relative aspect-square rounded-xl overflow-hidden">
                 {img ? (
-                  <img src={img} alt={`Csomagolás ${idx + 1}`} className="w-full h-full object-cover" />
+                  <Image src={img} alt={`Csomagolás ${idx + 1}`} fill className="object-cover" sizes="(max-width: 768px) 50vw, 25vw" />
                 ) : (
                   <ImagePlaceholder className="w-full h-full" />
                 )}

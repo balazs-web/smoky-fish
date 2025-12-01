@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Package } from 'lucide-react';
 import { getProducts, getUnits } from '@/lib/store-service';
 import { Button } from '@/components/ui/button';
@@ -95,12 +96,14 @@ export function FeaturedProducts() {
               >
                 {/* Product Image - Clickable */}
                 <Link href={`/termek/${product.slug}`}>
-                  <div className="aspect-square overflow-hidden bg-gray-100">
+                  <div className="relative aspect-square overflow-hidden bg-gray-100">
                     {imageUrl ? (
-                      <img
+                      <Image
                         src={imageUrl}
                         alt={product.name}
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                       />
                     ) : (
                       <div className="h-full w-full flex items-center justify-center">

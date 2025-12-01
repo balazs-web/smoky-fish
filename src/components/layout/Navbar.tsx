@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { ShoppingCart, Facebook, Instagram, Phone, Menu, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -24,7 +25,8 @@ export function Navbar() {
   const { itemCount, setIsBasketOpen } = useBasket();
 
   const logoSrc = siteConfig?.logoImageUrl || "";
-  const siteTitle = siteConfig?.siteTitle || "Matyistore";
+  const storeName = siteConfig?.storeName || "Matyistore";
+  const siteTitle = siteConfig?.siteTitle || storeName;
   const facebookUrl = siteConfig?.facebookUrl || "";
   const instagramUrl = siteConfig?.instagramUrl || "";
   const phoneNumber = siteConfig?.phoneNumber || "";
@@ -46,18 +48,19 @@ export function Navbar() {
         <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
           <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-sm bg-black/80">
             {logoSrc ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <Image
                 src={logoSrc}
                 alt={`${siteTitle} logó`}
-                className="h-full w-full object-contain"
+                fill
+                className="object-contain"
+                sizes="40px"
               />
             ) : (
               <span className="text-lg font-bold text-[#C89A63]">M</span>
             )}
           </div>
           <span className="text-sm font-semibold tracking-wide uppercase">
-            Matyistore
+            {storeName}
           </span>
         </Link>
 

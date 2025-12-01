@@ -2,6 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Calendar, Clock } from 'lucide-react';
 import { getFeaturedBlogPosts } from '@/lib/blog-service';
 import type { BlogPost } from '@/types';
@@ -19,12 +20,14 @@ function BlogCard({ post }: { post: BlogPost }) {
     <Link href={`/blog/${post.slug}`} className="group block">
       <article className="bg-white rounded-2xl overflow-hidden shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
         {/* Image */}
-        <div className="aspect-[16/10] overflow-hidden bg-gray-100">
+        <div className="relative aspect-[16/10] overflow-hidden bg-gray-100">
           {post.mainImageUrl ? (
-            <img
+            <Image
               src={post.mainImageUrl}
               alt={post.title}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              fill
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300">
