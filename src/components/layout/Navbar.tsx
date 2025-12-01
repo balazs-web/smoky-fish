@@ -25,7 +25,7 @@ export function Navbar() {
   const { itemCount, setIsBasketOpen } = useBasket();
 
   const logoSrc = siteConfig?.logoImageUrl || "";
-  const storeName = siteConfig?.storeName || "Matyistore";
+  const storeName = siteConfig?.storeName || "Smoky Fish";
   const siteTitle = siteConfig?.siteTitle || storeName;
   const facebookUrl = siteConfig?.facebookUrl || "";
   const instagramUrl = siteConfig?.instagramUrl || "";
@@ -56,7 +56,7 @@ export function Navbar() {
                 sizes="40px"
               />
             ) : (
-              <span className="text-lg font-bold text-[#C89A63]">M</span>
+              <span className="text-lg font-bold text-[#C89A63]">SF</span>
             )}
           </div>
           <span className="text-sm font-semibold tracking-wide uppercase">
