@@ -59,6 +59,8 @@ import {
   uploadSiteLogo,
   uploadOgImage,
 } from "@/lib/siteService";
+import { getCategories, getProducts } from "@/lib/store-service";
+import type { Category, Product } from "@/types";
 import { AboutProductsAdmin } from "@/components/admin/AboutProductsAdmin";
 
 const heroSchema = z.object({
@@ -181,6 +183,38 @@ export default function MatyiAdminPage() {
     queryFn: fetchSiteConfig,
     initialData: defaultSiteConfig,
   });
+
+  const { data: categories = [] } = useQuery<Category[]>({
+    queryKey: ["categories"],
+    queryFn: getCategories,
+  });
+
+  const { data: products = [] } = useQuery<Product[]>({
+    queryKey: ["products"],
+    queryFn: getProducts,
+  });
+
+  // Build link options for CTA selectors
+  const ctaLinkOptions = [
+    { value: "", label: "-- Válassz linket --" },
+    { value: "/", label: "🏠 Főoldal" },
+    { value: "/termekek", label: "🛒 Összes termék" },
+    { value: "#kategoriak", label: "📦 Kategóriák szekció" },
+    { value: "#termekek", label: "⭐ Kiemelt termékek szekció" },
+    { value: "#rolunk", label: "ℹ️ Rólunk szekció" },
+    { value: "#blog", label: "📝 Blog szekció" },
+    { value: "#kapcsolat", label: "📞 Kapcsolat (footer)" },
+    // Categories
+    ...categories.map((cat) => ({
+      value: `/kategoria/${cat.slug}`,
+      label: `📁 Kategória: ${cat.name}`,
+    })),
+    // Products
+    ...products.map((prod) => ({
+      value: `/termekek/${prod.slug}`,
+      label: `🏷️ Termék: ${prod.name}`,
+    })),
+  ];
 
   const {
     register,
@@ -518,10 +552,16 @@ export default function MatyiAdminPage() {
                 <label className="block text-xs font-medium text-neutral-200">
                   Elsődleges CTA hivatkozás
                 </label>
-                <input
+                <select
                   className="w-full rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-xs outline-none focus:border-[#C89A63]"
                   {...register("primaryCtaHref")}
-                />
+                >
+                  {ctaLinkOptions.map((opt, idx) => (
+                    <option key={opt.value || `empty-${idx}`} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
                 {errors.primaryCtaHref && (
                   <p className="text-xs text-red-400">
                     {errors.primaryCtaHref.message}
@@ -548,10 +588,16 @@ export default function MatyiAdminPage() {
                 <label className="block text-xs font-medium text-neutral-200">
                   Másodlagos CTA hivatkozás
                 </label>
-                <input
+                <select
                   className="w-full rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-xs outline-none focus:border-[#C89A63]"
                   {...register("secondaryCtaHref")}
-                />
+                >
+                  {ctaLinkOptions.map((opt, idx) => (
+                    <option key={opt.value || `empty-${idx}`} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
                 {errors.secondaryCtaHref && (
                   <p className="text-xs text-red-400">
                     {errors.secondaryCtaHref.message}

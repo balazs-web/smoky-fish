@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Phone, Mail, Facebook, Instagram } from 'lucide-react';
@@ -13,6 +13,26 @@ export function Footer() {
   const pathname = usePathname();
   const isHomePage = pathname === '/';
   const [activeLegalPage, setActiveLegalPage] = useState<LegalPageType | null>(null);
+  const [isContactHighlighted, setIsContactHighlighted] = useState(false);
+
+  // Highlight contact section when navigated via #kapcsolat
+  useEffect(() => {
+    const checkHash = () => {
+      if (window.location.hash === '#kapcsolat') {
+        setIsContactHighlighted(true);
+        // Remove highlight after animation
+        const timer = setTimeout(() => setIsContactHighlighted(false), 2000);
+        return () => clearTimeout(timer);
+      }
+    };
+
+    // Check on mount
+    checkHash();
+
+    // Listen for hash changes
+    window.addEventListener('hashchange', checkHash);
+    return () => window.removeEventListener('hashchange', checkHash);
+  }, []);
 
   const { data: siteConfig } = useQuery({
     queryKey: ['siteConfig'],
@@ -55,7 +75,7 @@ export function Footer() {
 
   return (
     <>
-      <footer className="bg-[#C89A63] text-black">
+      <footer id="kapcsolat" className="bg-[#C89A63] text-black">
         {/* Main footer content */}
         <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
@@ -109,7 +129,13 @@ export function Footer() {
             </div>
 
             {/* Contact */}
-            <div className="space-y-3">
+            <div
+              className={`space-y-3 rounded-lg p-3 -m-3 transition-all duration-500 ${
+                isContactHighlighted
+                  ? 'bg-black/10 ring-2 ring-black/20 shadow-lg'
+                  : ''
+              }`}
+            >
               <h3 className="text-sm font-semibold uppercase tracking-wider">Kapcsolat</h3>
               <ul className="space-y-2">
                 {phoneNumber && (

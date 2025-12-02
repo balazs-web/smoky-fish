@@ -2,10 +2,11 @@ import nodemailer from "nodemailer";
 import type { BasketItem, ShippingAddress, BillingAddress } from "@/contexts/BasketContext";
 
 // Email configuration from environment variables
+const smtpPort = parseInt(process.env.SMTP_PORT || "465");
 const smtpConfig = {
   host: process.env.SMTP_HOST || "mail.smoky-fish.hu",
-  port: parseInt(process.env.SMTP_PORT || "465"),
-  secure: true, // SSL/TLS
+  port: smtpPort,
+  secure: true, // SSL required for port 465
   auth: {
     user: process.env.SMTP_USER || "info@smoky-fish.hu",
     pass: process.env.SMTP_PASSWORD || "",
@@ -14,13 +15,43 @@ const smtpConfig = {
     // Accept self-signed certificates
     rejectUnauthorized: false,
   },
+  // Connection settings for better reliability
+  connectionTimeout: 15000, // 15 seconds
+  greetingTimeout: 15000,
+  socketTimeout: 20000,
 };
 
 const shopManagerEmail = process.env.SHOP_MANAGER_EMAIL || "info@smoky-fish.hu";
 const fromEmail = process.env.SMTP_USER || "info@smoky-fish.hu";
 
-// Create reusable transporter
-const transporter = nodemailer.createTransport(smtpConfig);
+// Create transporter on demand for better connection handling
+const createTransporter = () => nodemailer.createTransport(smtpConfig);
+
+// Send email with retry logic
+async function sendMailWithRetry(
+  mailOptions: nodemailer.SendMailOptions,
+  retries = 2
+): Promise<void> {
+  let lastError: Error | null = null;
+  
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const transporter = createTransporter();
+      await transporter.sendMail(mailOptions);
+      transporter.close();
+      return;
+    } catch (error) {
+      lastError = error as Error;
+      console.warn(`Email attempt ${attempt + 1} failed:`, (error as Error).message);
+      if (attempt < retries) {
+        // Wait before retry (exponential backoff)
+        await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
+      }
+    }
+  }
+  
+  throw lastError;
+}
 
 export interface OrderData {
   orderId: string;
@@ -207,7 +238,7 @@ export async function sendCustomerOrderConfirmation(
   `;
 
   try {
-    await transporter.sendMail({
+    await sendMailWithRetry({
       from: `"Matyistore" <${fromEmail}>`,
       to: order.shippingAddress.email,
       subject: `Rendelés visszaigazolás - #${order.orderId}`,
@@ -216,7 +247,7 @@ export async function sendCustomerOrderConfirmation(
     console.log(`Customer confirmation email sent to ${order.shippingAddress.email}`);
     return true;
   } catch (error) {
-    console.error("Failed to send customer email:", error);
+    console.error("Failed to send customer email after retries:", error);
     return false;
   }
 }
@@ -296,7 +327,7 @@ export async function sendShopManagerNotification(
   `;
 
   try {
-    await transporter.sendMail({
+    await sendMailWithRetry({
       from: `"Matyistore Rendszer" <${fromEmail}>`,
       to: shopManagerEmail,
       subject: `🛒 Új rendelés - #${order.orderId} - ${formatPrice(order.totalPrice)}`,
@@ -305,7 +336,7 @@ export async function sendShopManagerNotification(
     console.log(`Shop manager notification sent to ${shopManagerEmail}`);
     return true;
   } catch (error) {
-    console.error("Failed to send shop manager email:", error);
+    console.error("Failed to send shop manager email after retries:", error);
     return false;
   }
 }

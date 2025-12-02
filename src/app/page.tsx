@@ -9,6 +9,7 @@ import { BlogSection } from "@/components/layout/BlogSection";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import Link from "next/link";
 import { defaultHeroConfig } from "@/config/heroConfig";
 import { defaultBenefitsConfig } from "@/config/benefitsConfig";
 import { useQuery } from "@tanstack/react-query";
@@ -63,15 +64,38 @@ export default function Home() {
               {hero.description}
             </p>
             <div className="flex flex-wrap gap-3">
-              <Button className="bg-[#C89A63] text-black hover:bg-[#b8864f]">
-                {hero.primaryCtaLabel}
-              </Button>
-              <Button
-                variant="outline"
-                className="border-white/60 bg-transparent text-white hover:bg-white/10"
-              >
-                {hero.secondaryCtaLabel}
-              </Button>
+              {hero.primaryCtaHref?.startsWith("#") ? (
+                <a href={hero.primaryCtaHref}>
+                  <Button className="bg-[#C89A63] text-black hover:bg-[#b8864f]">
+                    {hero.primaryCtaLabel}
+                  </Button>
+                </a>
+              ) : (
+                <Link href={hero.primaryCtaHref || "/"}>
+                  <Button className="bg-[#C89A63] text-black hover:bg-[#b8864f]">
+                    {hero.primaryCtaLabel}
+                  </Button>
+                </Link>
+              )}
+              {hero.secondaryCtaHref?.startsWith("#") ? (
+                <a href={hero.secondaryCtaHref}>
+                  <Button
+                    variant="outline"
+                    className="border-white/60 bg-transparent text-white hover:bg-white/10"
+                  >
+                    {hero.secondaryCtaLabel}
+                  </Button>
+                </a>
+              ) : (
+                <Link href={hero.secondaryCtaHref || "/"}>
+                  <Button
+                    variant="outline"
+                    className="border-white/60 bg-transparent text-white hover:bg-white/10"
+                  >
+                    {hero.secondaryCtaLabel}
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
         </section>

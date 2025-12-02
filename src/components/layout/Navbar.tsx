@@ -34,11 +34,9 @@ export function Navbar() {
   // Navigation links - anchor links on homepage, full URLs on other pages
   const navLinks = [
     { href: isHomePage ? "#fooldal" : "/", label: "Főoldal" },
-    { href: isHomePage ? "#kategoriak" : "/#kategoriak", label: "Kategóriák" },
-    { href: isHomePage ? "#termekek" : "/#termekek", label: "Kiemelt termékek" },
-    { href: "/termekek", label: "Összes termék" },
-    { href: isHomePage ? "#rolunk" : "/#rolunk", label: "Rólunk" },
+    { href: "/termekek", label: "Termékek" },
     { href: isHomePage ? "#blog" : "/#blog", label: "Blog" },
+    { href: isHomePage ? "#kapcsolat" : "/#kapcsolat", label: "Kapcsolat" },
   ];
 
   return (
@@ -59,9 +57,6 @@ export function Navbar() {
               <span className="text-lg font-bold text-[#C89A63]">SF</span>
             )}
           </div>
-          <span className="text-sm font-semibold tracking-wide uppercase">
-            {storeName}
-          </span>
         </Link>
 
         {/* Desktop Navigation */}

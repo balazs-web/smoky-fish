@@ -1,0 +1,38 @@
+[debug] [2025-12-02T14:50:22.273Z] ----------------------------------------------------------------------
+[debug] [2025-12-02T14:50:22.286Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\b\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy
+[debug] [2025-12-02T14:50:22.286Z] CLI Version:   14.26.0
+[debug] [2025-12-02T14:50:22.287Z] Platform:      win32
+[debug] [2025-12-02T14:50:22.287Z] Node Version:  v22.15.0
+[debug] [2025-12-02T14:50:22.287Z] Time:          Tue Dec 02 2025 15:50:22 GMT+0100 (Central European Standard Time)
+[debug] [2025-12-02T14:50:22.287Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-12-02T14:50:22.679Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-12-02T14:50:22.681Z] > authorizing via signed-in user (balazs@preion.pro)
+[debug] [2025-12-02T14:50:22.681Z] [iam] checking project smoky-fish for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2025-12-02T14:50:22.683Z] Checked if tokens are valid: false, expires at: 1764685178793
+[debug] [2025-12-02T14:50:22.683Z] Checked if tokens are valid: false, expires at: 1764685178793
+[debug] [2025-12-02T14:50:22.683Z] > refreshing access token with scopes: []
+[debug] [2025-12-02T14:50:22.688Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-12-02T14:50:22.688Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-12-02T14:50:22.991Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2025-12-02T14:50:22.991Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-12-02T14:50:23.002Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/smoky-fish:testIamPermissions [none]
+[debug] [2025-12-02T14:50:23.002Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/smoky-fish:testIamPermissions x-goog-quota-user=projects/smoky-fish
+[debug] [2025-12-02T14:50:23.003Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/smoky-fish:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2025-12-02T14:50:23.988Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/smoky-fish:testIamPermissions 200
+[debug] [2025-12-02T14:50:23.988Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/smoky-fish:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2025-12-02T14:50:23.989Z] Checked if tokens are valid: true, expires at: 1764690621992
+[debug] [2025-12-02T14:50:23.989Z] Checked if tokens are valid: true, expires at: 1764690621992
+[debug] [2025-12-02T14:50:23.989Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/smoky-fish [none]
+[debug] [2025-12-02T14:50:24.606Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/smoky-fish 200
+[debug] [2025-12-02T14:50:24.606Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/smoky-fish {"projectId":"smoky-fish","projectNumber":"724190802508","displayName":"Smoky Fish","name":"projects/smoky-fish","resources":{"hostingSite":"smoky-fish"},"state":"ACTIVE","etag":"1_a81052b4-21fb-48f3-843a-cca33f24b23d"}
+[debug] [2025-12-02T14:50:30.464Z] Checked if tokens are valid: true, expires at: 1764690621992
+[debug] [2025-12-02T14:50:30.464Z] Checked if tokens are valid: true, expires at: 1764690621992
+[debug] [2025-12-02T14:50:30.465Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/smoky-fish/sites pageToken=&pageSize=10
+[debug] [2025-12-02T14:50:31.583Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/smoky-fish/sites 200
+[debug] [2025-12-02T14:50:31.584Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/smoky-fish/sites {"sites":[{"name":"projects/smoky-fish/sites/smoky-fish","defaultUrl":"https://smoky-fish.web.app","appId":"1:724190802508:web:800f1fbfd21b12d4ebbae9","type":"DEFAULT_SITE"}]}
+[debug] [2025-12-02T14:50:31.585Z] Checked if tokens are valid: true, expires at: 1764690621992
+[debug] [2025-12-02T14:50:31.585Z] Checked if tokens are valid: true, expires at: 1764690621992
+[debug] [2025-12-02T14:50:31.585Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/-/webApps/1:724190802508:web:800f1fbfd21b12d4ebbae9/config [none]
+[debug] [2025-12-02T14:50:32.286Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/-/webApps/1:724190802508:web:800f1fbfd21b12d4ebbae9/config 200
+[debug] [2025-12-02T14:50:32.286Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/-/webApps/1:724190802508:web:800f1fbfd21b12d4ebbae9/config {"projectId":"smoky-fish","appId":"1:724190802508:web:800f1fbfd21b12d4ebbae9","storageBucket":"smoky-fish.firebasestorage.app","apiKey":"AIzaSyBXRgquKODCJp1I_Kaq7ZBBVn6XJ7GyLNo","authDomain":"smoky-fish.firebaseapp.com","messagingSenderId":"724190802508","measurementId":"G-31VQSM3XT9","projectNumber":"724190802508","version":"2"}
