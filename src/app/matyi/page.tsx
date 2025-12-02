@@ -57,6 +57,7 @@ import {
   fetchSiteConfig,
   saveSiteConfig,
   uploadSiteLogo,
+  uploadOgImage,
 } from "@/lib/siteService";
 import { AboutProductsAdmin } from "@/components/admin/AboutProductsAdmin";
 
@@ -98,6 +99,7 @@ const siteSchema = z.object({
   logoImageUrl: z.string().min(1, "Kötelező mező"),
   seoTitle: z.string().optional(),
   seoDescription: z.string().optional(),
+  ogImageUrl: z.string().optional(),
   facebookUrl: z.string().url("Érvényes URL szükséges").or(z.literal("")).optional(),
   instagramUrl: z.string().url("Érvényes URL szükséges").or(z.literal("")).optional(),
   phoneNumber: z.string().optional(),
@@ -340,6 +342,20 @@ export default function MatyiAdminPage() {
     } catch (error) {
       console.error("Logo upload failed:", error);
       alert("Hiba a logó feltöltésekor. Kérlek próbáld újra.");
+    }
+  };
+
+  const handleOgImageChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const oldUrl = getValuesSite("ogImageUrl");
+      const url = await uploadOgImage(file, oldUrl);
+      setValueSite("ogImageUrl", url, { shouldDirty: true });
+    } catch (error) {
+      console.error("OG image upload failed:", error);
+      alert("Hiba az OpenGraph kép feltöltésekor. Kérlek próbáld újra.");
     }
   };
 
@@ -877,6 +893,39 @@ export default function MatyiAdminPage() {
                   className="w-full rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-xs outline-none focus:border-[#C89A63]"
                   {...registerSite("seoDescription")}
                 />
+              </div>
+
+              <div className="border-t border-neutral-800 pt-4">
+                <h3 className="mb-3 text-xs font-semibold text-neutral-300">
+                  OpenGraph kép (közösségi megosztás)
+                </h3>
+
+                <div className="space-y-3">
+                  <div className="space-y-1">
+                    <label className="block text-xs font-medium text-neutral-200">
+                      OG kép URL
+                    </label>
+                    <input
+                      className="w-full rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-xs outline-none focus:border-[#C89A63]"
+                      {...registerSite("ogImageUrl")}
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="block text-xs font-medium text-neutral-200">
+                      OG kép feltöltése
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleOgImageChange}
+                      className="block w-full text-xs text-neutral-300 file:mr-2 file:rounded file:border-0 file:bg-[#C89A63] file:px-3 file:py-1 file:text-xs file:font-medium file:text-black hover:file:bg-[#b8864f]"
+                    />
+                    <p className="text-[10px] text-neutral-500">
+                      Ajánlott méret: 1200×630 px. Ez a kép jelenik meg Facebook, Twitter és más közösségi oldalakon megosztáskor.
+                    </p>
+                  </div>
+                </div>
               </div>
 
               <div className="border-t border-neutral-800 pt-4">

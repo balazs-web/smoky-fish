@@ -5,6 +5,7 @@ export type SiteConfig = {
   logoImageUrl: string;
   seoTitle?: string;
   seoDescription?: string;
+  ogImageUrl?: string;
   facebookUrl?: string;
   instagramUrl?: string;
   phoneNumber?: string;
@@ -25,6 +26,7 @@ export const defaultSiteConfig: SiteConfig = {
   seoTitle: "Matyistore – Prémium füstölt lazac, sajtok és grúz borok",
   seoDescription:
     "Füstölt halak, érlelt kézműves sajtok és eredeti grúz borok házhozszállítással Budapesten és Pest megyében.",
+  ogImageUrl: "",
   facebookUrl: "",
   instagramUrl: "",
   phoneNumber: "",

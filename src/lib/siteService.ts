@@ -43,6 +43,38 @@ export async function deleteSiteLogo(url: string): Promise<void> {
   }
 }
 
+export async function deleteOgImage(url: string): Promise<void> {
+  if (!url || !url.includes("branding%2Fog-image")) return;
+  
+  try {
+    const decodedUrl = decodeURIComponent(url);
+    const match = decodedUrl.match(/branding\/og-image[^?]+/);
+    if (match) {
+      const path = match[0];
+      const fileRef = ref(storage, path);
+      await deleteObject(fileRef);
+    }
+  } catch (error) {
+    console.warn("Could not delete old OG image:", error);
+  }
+}
+
+export async function uploadOgImage(file: File, oldUrl?: string): Promise<string> {
+  if (oldUrl) {
+    await deleteOgImage(oldUrl);
+  }
+  
+  const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
+  const objectRef = ref(storage, `branding/og-image-${Date.now()}-${safeName}`);
+
+  await uploadBytes(objectRef, file, {
+    contentType: file.type,
+  });
+
+  const url = await getDownloadURL(objectRef);
+  return url;
+}
+
 export async function uploadSiteLogo(file: File, oldUrl?: string): Promise<string> {
   if (oldUrl) {
     await deleteSiteLogo(oldUrl);

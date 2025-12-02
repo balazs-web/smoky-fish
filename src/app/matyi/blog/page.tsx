@@ -462,7 +462,7 @@ export default function BlogAdminPage() {
     <div className="min-h-screen bg-neutral-950 text-neutral-50">
       {/* Header */}
       <header className="border-b border-neutral-800 bg-black/80 px-6 py-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between pr-48">
           <div className="flex items-center gap-4">
             <Link
               href="/matyi"
