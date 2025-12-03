@@ -7,6 +7,9 @@ import Link from '@tiptap/extension-link';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import Placeholder from '@tiptap/extension-placeholder';
+import { Color } from '@tiptap/extension-color';
+import { TextStyle } from '@tiptap/extension-text-style';
+import Highlight from '@tiptap/extension-highlight';
 import {
   Bold,
   Italic,
@@ -28,9 +31,35 @@ import {
   Redo,
   Lightbulb,
   Gift,
+  Palette,
+  Highlighter,
+  ChevronDown,
 } from 'lucide-react';
-import { useCallback, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { uploadImage } from '@/lib/storage-service';
+
+// Predefined color options
+const TEXT_COLORS = [
+  { name: 'Alapértelmezett', color: '' },
+  { name: 'Fehér', color: '#FFFFFF' },
+  { name: 'Arany', color: '#C89A63' },
+  { name: 'Zöld', color: '#1B5E4B' },
+  { name: 'Kék', color: '#3B82F6' },
+  { name: 'Piros', color: '#EF4444' },
+  { name: 'Narancssárga', color: '#F97316' },
+  { name: 'Lila', color: '#8B5CF6' },
+  { name: 'Szürke', color: '#9CA3AF' },
+];
+
+const HIGHLIGHT_COLORS = [
+  { name: 'Nincs', color: '' },
+  { name: 'Sárga', color: '#FEF08A' },
+  { name: 'Zöld', color: '#BBF7D0' },
+  { name: 'Kék', color: '#BFDBFE' },
+  { name: 'Rózsaszín', color: '#FBCFE8' },
+  { name: 'Narancssárga', color: '#FED7AA' },
+  { name: 'Lila', color: '#DDD6FE' },
+];
 
 interface RichTextEditorProps {
   value: string;
@@ -70,6 +99,74 @@ function ToolbarButton({
 
 function ToolbarDivider() {
   return <div className="w-px h-8 bg-neutral-700 mx-2" />;
+}
+
+function ColorPicker({
+  colors,
+  currentColor,
+  onSelect,
+  icon: Icon,
+  title,
+}: {
+  colors: { name: string; color: string }[];
+  currentColor: string;
+  onSelect: (color: string) => void;
+  icon: React.ElementType;
+  title: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        title={title}
+        className="flex items-center gap-0.5 p-2 rounded-lg transition-colors text-neutral-300 hover:text-neutral-100 hover:bg-neutral-700"
+      >
+        <Icon className="h-5 w-5" style={currentColor ? { color: currentColor } : {}} />
+        <ChevronDown className="h-3 w-3" />
+      </button>
+      {isOpen && (
+        <div className="absolute top-full left-0 mt-1 bg-neutral-800 border border-neutral-700 rounded-lg shadow-xl z-50 p-2 min-w-[140px]">
+          <div className="grid grid-cols-3 gap-1">
+            {colors.map((c) => (
+              <button
+                key={c.name}
+                type="button"
+                onClick={() => {
+                  onSelect(c.color);
+                  setIsOpen(false);
+                }}
+                className={`w-8 h-8 rounded border-2 transition-all ${
+                  currentColor === c.color
+                    ? 'border-[#C89A63] scale-110'
+                    : 'border-neutral-600 hover:border-neutral-400'
+                }`}
+                style={{ backgroundColor: c.color || 'transparent' }}
+                title={c.name}
+              >
+                {!c.color && (
+                  <span className="text-neutral-500 text-xs">✕</span>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 function Toolbar({ editor }: { editor: Editor }) {
@@ -275,6 +372,36 @@ function Toolbar({ editor }: { editor: Editor }) {
 
       <ToolbarDivider />
 
+      {/* Text & Highlight Colors */}
+      <ColorPicker
+        colors={TEXT_COLORS}
+        currentColor={editor.getAttributes('textStyle').color || ''}
+        onSelect={(color) => {
+          if (color) {
+            editor.chain().focus().setColor(color).run();
+          } else {
+            editor.chain().focus().unsetColor().run();
+          }
+        }}
+        icon={Palette}
+        title="Szöveg szín"
+      />
+      <ColorPicker
+        colors={HIGHLIGHT_COLORS}
+        currentColor={editor.getAttributes('highlight').color || ''}
+        onSelect={(color) => {
+          if (color) {
+            editor.chain().focus().setHighlight({ color }).run();
+          } else {
+            editor.chain().focus().unsetHighlight().run();
+          }
+        }}
+        icon={Highlighter}
+        title="Kiemelés szín"
+      />
+
+      <ToolbarDivider />
+
       {/* Special boxes */}
       <ToolbarButton onClick={insertTipBox} title="Tipp doboz beszúrása">
         <Lightbulb className="h-5 w-5" />
@@ -293,7 +420,15 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
       StarterKit.configure({
         heading: {
           levels: [1, 2, 3],
+          HTMLAttributes: {
+            class: 'font-semibold',
+          },
         },
+      }),
+      TextStyle,
+      Color,
+      Highlight.configure({
+        multicolor: true,
       }),
       Image.configure({
         HTMLAttributes: {
@@ -322,6 +457,9 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
           'prose-headings:text-neutral-100 prose-p:text-neutral-300 prose-strong:text-neutral-100 ' +
           'prose-a:text-[#C89A63] prose-blockquote:border-l-[#C89A63] prose-blockquote:text-neutral-400 ' +
           'prose-li:text-neutral-300 prose-img:rounded-xl prose-hr:border-neutral-700 ' +
+          '[&_h1]:text-3xl [&_h1]:font-bold [&_h1]:mb-4 [&_h1]:mt-6 ' +
+          '[&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:mb-3 [&_h2]:mt-5 ' +
+          '[&_h3]:text-xl [&_h3]:font-medium [&_h3]:mb-2 [&_h3]:mt-4 ' +
           '[&_.tip-box]:bg-[#FEF3C7]/10 [&_.tip-box]:border-l-4 [&_.tip-box]:border-[#C89A63] [&_.tip-box]:p-4 [&_.tip-box]:rounded-r-lg [&_.tip-box]:my-4 ' +
           '[&_.promo-box]:bg-[#C89A63]/10 [&_.promo-box]:p-4 [&_.promo-box]:rounded-lg [&_.promo-box]:my-4',
       },

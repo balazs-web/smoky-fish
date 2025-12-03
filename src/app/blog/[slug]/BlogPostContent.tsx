@@ -250,19 +250,7 @@ export default function BlogPostContent({ slug }: { slug: string }) {
 
               {/* Article Content */}
               <div
-                className="prose prose-lg prose-gray max-w-none
-                  prose-headings:text-gray-900 prose-headings:font-bold
-                  prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4 prose-h2:text-[#C89A63]
-                  prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3
-                  prose-p:text-gray-600 prose-p:leading-relaxed
-                  prose-a:text-[#1B5E4B] prose-a:no-underline hover:prose-a:underline
-                  prose-strong:text-gray-900
-                  prose-ul:my-4 prose-li:text-gray-600
-                  prose-img:rounded-xl prose-img:shadow-lg prose-img:my-8 prose-img:max-w-md prose-img:mx-auto prose-img:block
-                  [&_img]:max-w-full [&_img]:h-auto [&_img]:max-h-96 [&_img]:object-contain [&_img]:mx-auto
-                  [&_.tip-box]:bg-[#FEF3C7] [&_.tip-box]:border-l-4 [&_.tip-box]:border-[#C89A63] [&_.tip-box]:p-4 [&_.tip-box]:rounded-r-lg [&_.tip-box]:my-6
-                  [&_.promo-box]:bg-[#C89A63]/10 [&_.promo-box]:p-6 [&_.promo-box]:rounded-xl [&_.promo-box]:my-8
-                "
+                className="blog-content max-w-none"
                 dangerouslySetInnerHTML={{ __html: post.content }}
               />
 
