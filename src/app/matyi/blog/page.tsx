@@ -46,6 +46,7 @@ import {
 import { getCategories } from '@/lib/store-service';
 import { uploadImage } from '@/lib/storage-service';
 import { RichTextEditor } from '@/components/admin/RichTextEditor';
+import { AccentWarning, hasAccents } from '@/components/ui/accent-warning';
 import type { BlogPost, BlogPostFormData, Category } from '@/types';
 
 const blogPostSchema = z.object({
@@ -75,6 +76,7 @@ export default function BlogAdminPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const [showAccentWarning, setShowAccentWarning] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -358,6 +360,12 @@ export default function BlogAdminPage() {
                     <span className="text-xs text-neutral-500">/blog/</span>
                     <input
                       {...register('slug')}
+                      onChange={(e) => {
+                        setValue('slug', e.target.value);
+                        if (hasAccents(e.target.value)) {
+                          setShowAccentWarning(true);
+                        }
+                      }}
                       className="flex-1 rounded border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm outline-none focus:border-[#C89A63]"
                       placeholder="cikk-url"
                     />
@@ -619,6 +627,13 @@ export default function BlogAdminPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Slug Warning Dialog */}
+      <AccentWarning 
+        isOpen={showAccentWarning} 
+        onClose={() => setShowAccentWarning(false)}
+        onClearSlug={() => setValue('slug', '')}
+      />
     </div>
   );
 }

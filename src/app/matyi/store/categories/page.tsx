@@ -30,6 +30,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { ImageUpload } from '@/components/ui/image-upload';
+import { AccentWarning, hasAccents } from '@/components/ui/accent-warning';
 
 import {
   getCategories,
@@ -58,6 +59,7 @@ export default function CategoriesPage() {
   const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [showAccentWarning, setShowAccentWarning] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [originalImageUrl, setOriginalImageUrl] = useState<string | null>(null);
@@ -191,6 +193,14 @@ export default function CategoriesPage() {
     form.setValue('name', name);
     if (!editingCategory) {
       form.setValue('slug', generateSlug(name));
+    }
+  };
+
+  const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const slug = e.target.value;
+    form.setValue('slug', slug);
+    if (hasAccents(slug)) {
+      setShowAccentWarning(true);
     }
   };
 
@@ -334,6 +344,7 @@ export default function CategoriesPage() {
               <Input
                 id="slug"
                 {...form.register('slug')}
+                onChange={handleSlugChange}
                 placeholder="e.g., cheese"
               />
               {form.formState.errors.slug && (
@@ -445,6 +456,13 @@ export default function CategoriesPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Slug Warning Dialog */}
+      <AccentWarning 
+        isOpen={showAccentWarning} 
+        onClose={() => setShowAccentWarning(false)}
+        onClearSlug={() => form.setValue('slug', '')}
+      />
     </div>
   );
 }

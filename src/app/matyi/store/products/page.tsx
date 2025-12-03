@@ -14,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ImageUpload } from '@/components/ui/image-upload';
+import { AccentWarning, hasAccents } from '@/components/ui/accent-warning';
 import {
   Dialog,
   DialogContent,
@@ -79,6 +80,7 @@ export default function ProductsPage() {
   const [originalImageUrls, setOriginalImageUrls] = useState<string[]>([]);
   const [variants, setVariants] = useState<ProductVariant[]>([]);
   const [newVariantName, setNewVariantName] = useState('');
+  const [showAccentWarning, setShowAccentWarning] = useState(false);
 
   const { data: products = [], isLoading: productsLoading } = useQuery({
     queryKey: ['products'],
@@ -258,6 +260,14 @@ export default function ProductsPage() {
     form.setValue('name', name);
     if (!editingProduct) {
       form.setValue('slug', generateSlug(name));
+    }
+  };
+
+  const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const slug = e.target.value;
+    form.setValue('slug', slug);
+    if (hasAccents(slug)) {
+      setShowAccentWarning(true);
     }
   };
 
@@ -486,6 +496,7 @@ export default function ProductsPage() {
                 <Input
                   id="slug"
                   {...form.register('slug')}
+                  onChange={handleSlugChange}
                   placeholder="e.g., aged-cheddar"
                 />
                 {form.formState.errors.slug && (
@@ -735,6 +746,13 @@ export default function ProductsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Slug Warning Dialog */}
+      <AccentWarning 
+        isOpen={showAccentWarning} 
+        onClose={() => setShowAccentWarning(false)}
+        onClearSlug={() => form.setValue('slug', '')}
+      />
     </div>
   );
 }
