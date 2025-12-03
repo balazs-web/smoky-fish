@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Minus, Plus, ShoppingCart, Trash2, Package, Loader2, CheckCircle, MapPin } from "lucide-react";
+import { Minus, Plus, ShoppingCart, Trash2, Package, Loader2, CheckCircle, MapPin, Wine, FileText, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,13 +12,20 @@ import {
   SheetTitle,
   SheetFooter,
 } from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useBasket } from "@/contexts/BasketContext";
-import type { Unit, StoreSettings } from "@/types";
+import type { Unit, StoreSettings, Category } from "@/types";
 import { DELIVERY_POSTCODES, getCityFromPostcode } from "@/config/deliveryPostcodes";
 
 interface BasketSheetProps {
   units?: Unit[];
   storeSettings?: StoreSettings;
+  categories?: Category[];
 }
 
 type CheckoutStep = "basket" | "shipping" | "billing" | "success";
@@ -28,7 +35,7 @@ interface OrderResult {
   success: boolean;
 }
 
-export function BasketSheet({ units = [], storeSettings }: BasketSheetProps) {
+export function BasketSheet({ units = [], storeSettings, categories = [] }: BasketSheetProps) {
   const {
     items,
     itemCount,
@@ -48,6 +55,17 @@ export function BasketSheet({ units = [], storeSettings }: BasketSheetProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderResult, setOrderResult] = useState<OrderResult | null>(null);
   const [orderError, setOrderError] = useState<string | null>(null);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [acceptedAge, setAcceptedAge] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+
+  // Check if any item in the cart has 18+ restriction
+  const hasAlcoholItems = useMemo(() => {
+    return items.some((item) => {
+      const category = categories.find((c) => c.id === item.product.categoryId);
+      return category?.isAlcohol18Plus;
+    });
+  }, [items, categories]);
 
   // Validate shipping postcode against whitelist
   const isValidShippingPostcode = useMemo(() => {
@@ -97,6 +115,9 @@ export function BasketSheet({ units = [], storeSettings }: BasketSheetProps) {
       } else {
         setCurrentStep("basket");
       }
+      // Reset checkboxes
+      setAcceptedTerms(false);
+      setAcceptedAge(false);
     }, 300);
   };
 
@@ -122,6 +143,18 @@ export function BasketSheet({ units = [], storeSettings }: BasketSheetProps) {
         setOrderError("Kérlek töltsd ki az összes kötelező mezőt a számlázási adatoknál!");
         return;
       }
+    }
+
+    // Validate terms acceptance
+    if (!acceptedTerms) {
+      setOrderError("Kérlek fogadd el az Általános Szerződési Feltételeket!");
+      return;
+    }
+
+    // Validate 18+ acknowledgment if cart has alcohol
+    if (hasAlcoholItems && !acceptedAge) {
+      setOrderError("Kérlek erősítsd meg, hogy betöltötted a 18. életévet az alkoholtartalmú termékek vásárlásához!");
+      return;
     }
 
     setIsSubmitting(true);
@@ -179,9 +212,10 @@ export function BasketSheet({ units = [], storeSettings }: BasketSheetProps) {
         <div className="space-y-4">
           {items.map((item) => {
             const imageUrl = item.product.imageUrl || item.product.images?.[0];
+            const itemPrice = item.product.price + (item.variant?.priceModifier || 0);
             return (
               <div
-                key={item.product.id}
+                key={`${item.product.id}-${item.variant?.id || 'no-variant'}`}
                 className="flex gap-3 bg-[#F5F3EF] rounded-xl p-3"
               >
                 {/* Product Image */}
@@ -203,9 +237,12 @@ export function BasketSheet({ units = [], storeSettings }: BasketSheetProps) {
                 <div className="flex flex-col flex-1 min-w-0">
                   <h4 className="font-medium text-gray-900 text-sm line-clamp-2">
                     {item.product.name}
+                    {item.variant && (
+                      <span className="text-[#1B5E4B] ml-1">({item.variant.name})</span>
+                    )}
                   </h4>
                   <p className="text-[#1B5E4B] font-semibold mt-1">
-                    {formatPrice(item.product.price)} Ft
+                    {formatPrice(itemPrice)} Ft
                     {item.product.unitId && (
                       <span className="text-xs font-normal text-gray-500 ml-1">
                         / {getUnitName(item.product.unitId)}
@@ -221,7 +258,7 @@ export function BasketSheet({ units = [], storeSettings }: BasketSheetProps) {
                         size="icon"
                         className="h-7 w-7"
                         onClick={() =>
-                          updateQuantity(item.product.id, item.quantity - 1)
+                          updateQuantity(item.product.id, item.quantity - 1, item.variant?.id)
                         }
                       >
                         <Minus className="h-3 w-3" />
@@ -234,7 +271,7 @@ export function BasketSheet({ units = [], storeSettings }: BasketSheetProps) {
                         size="icon"
                         className="h-7 w-7"
                         onClick={() =>
-                          updateQuantity(item.product.id, item.quantity + 1)
+                          updateQuantity(item.product.id, item.quantity + 1, item.variant?.id)
                         }
                       >
                         <Plus className="h-3 w-3" />
@@ -244,7 +281,7 @@ export function BasketSheet({ units = [], storeSettings }: BasketSheetProps) {
                       variant="ghost"
                       size="icon"
                       className="h-7 w-7 text-red-500 hover:text-red-600 hover:bg-red-50"
-                      onClick={() => removeItem(item.product.id)}
+                      onClick={() => removeItem(item.product.id, item.variant?.id)}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -593,8 +630,149 @@ export function BasketSheet({ units = [], storeSettings }: BasketSheetProps) {
             </div>
           </div>
         )}
+
+        {/* Terms & Conditions and Age Verification */}
+        <div className="mt-6 pt-4 border-t space-y-4">
+          {/* 18+ Warning for alcohol */}
+          {hasAlcoholItems && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <Wine className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="font-medium text-red-800 text-sm">18+ Termékek a kosárban</p>
+                  <p className="text-xs text-red-700 mt-1">
+                    A kosaradban alkoholtartalmú termék található. A megrendelés leadásához és átvételéhez igazolnod kell, hogy betöltötted a 18. életéved.
+                  </p>
+                  <div className="flex items-center gap-2 mt-3">
+                    <input
+                      type="checkbox"
+                      id="acceptAge"
+                      checked={acceptedAge}
+                      onChange={(e) => setAcceptedAge(e.target.checked)}
+                      className="h-4 w-4 rounded border-red-300 text-red-600 focus:ring-red-500"
+                    />
+                    <Label htmlFor="acceptAge" className="cursor-pointer text-sm text-red-800 font-medium">
+                      Kijelentem, hogy betöltöttem a 18. életévemet
+                    </Label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ÁSZF Acceptance */}
+          <div className="flex items-start gap-2">
+            <input
+              type="checkbox"
+              id="acceptTerms"
+              checked={acceptedTerms}
+              onChange={(e) => setAcceptedTerms(e.target.checked)}
+              className="h-4 w-4 rounded border-gray-300 text-[#1B5E4B] focus:ring-[#1B5E4B] mt-0.5"
+            />
+            <Label htmlFor="acceptTerms" className="cursor-pointer text-sm text-gray-700">
+              Elolvastam és elfogadom az{" "}
+              <button
+                type="button"
+                onClick={() => setShowTermsModal(true)}
+                className="text-[#1B5E4B] underline hover:text-[#247a61] font-medium"
+              >
+                Általános Szerződési Feltételeket
+              </button>
+              {" "}és az{" "}
+              <button
+                type="button"
+                onClick={() => setShowTermsModal(true)}
+                className="text-[#1B5E4B] underline hover:text-[#247a61] font-medium"
+              >
+                Adatkezelési Tájékoztatót
+              </button>
+              .
+            </Label>
+          </div>
+        </div>
       </div>
     </div>
+  );
+
+  const renderTermsModal = () => (
+    <Dialog open={showTermsModal} onOpenChange={setShowTermsModal}>
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            Általános Szerződési Feltételek
+          </DialogTitle>
+        </DialogHeader>
+        <div className="prose prose-sm max-w-none text-gray-700">
+          <h3>1. Általános rendelkezések</h3>
+          <p>
+            Jelen Általános Szerződési Feltételek (továbbiakban: ÁSZF) a Matyi Store webáruház 
+            (továbbiakban: Szolgáltató) és a vásárló (továbbiakban: Vevő) között létrejövő 
+            szerződés feltételeit szabályozzák.
+          </p>
+
+          <h3>2. Megrendelés</h3>
+          <p>
+            A Vevő a weboldalon keresztül leadott megrendeléssel ajánlatot tesz a Szolgáltatónak. 
+            A szerződés a megrendelés Szolgáltató általi visszaigazolásával jön létre.
+          </p>
+
+          <h3>3. Árak és fizetés</h3>
+          <p>
+            Az árak forintban értendők és tartalmazzák az ÁFÁ-t. A fizetés utánvéttel, 
+            a termék átvételekor történik.
+          </p>
+
+          <h3>4. Szállítás</h3>
+          <p>
+            A szállítás Budapest és Pest megye területére történik. A szállítási költséget 
+            a pénztárnál feltüntetjük. Bizonyos rendelési érték felett a szállítás ingyenes.
+          </p>
+
+          <h3>5. Elállási jog</h3>
+          <p>
+            A Vevő 14 napon belül indoklás nélkül elállhat a szerződéstől, kivéve romlandó 
+            élelmiszerek esetében. Az elállási jog gyakorlásához írásban kell jelezni 
+            szándékát a Szolgáltatónak.
+          </p>
+
+          <h3>6. Alkoholtartalmú termékek</h3>
+          <p>
+            Alkoholtartalmú termékek kizárólag 18. életévüket betöltött személyek részére 
+            értékesíthetők. A Szolgáltató jogosult életkor ellenőrzést végezni az átadáskor.
+          </p>
+
+          <h3>7. Adatkezelés</h3>
+          <p>
+            A Szolgáltató a Vevő személyes adatait a hatályos adatvédelmi jogszabályoknak 
+            megfelelően kezeli. Az adatokat kizárólag a megrendelés teljesítéséhez és 
+            kapcsolattartáshoz használjuk fel.
+          </p>
+
+          <h3>8. Kapcsolat</h3>
+          <p>
+            Kérdés vagy panasz esetén a weboldalon megadott elérhetőségeken vagyunk elérhetők.
+          </p>
+        </div>
+        <div className="flex justify-end gap-2 mt-4 pt-4 border-t">
+          <Button
+            variant="outline"
+            onClick={() => setShowTermsModal(false)}
+          >
+            Bezárás
+          </Button>
+          <Button
+            className="bg-[#1B5E4B] hover:bg-[#247a61] text-white"
+            onClick={() => {
+              setAcceptedTerms(true);
+              setShowTermsModal(false);
+            }}
+          >
+            Elfogadom
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 
   const renderStepIndicator = () => {
@@ -758,29 +936,34 @@ export function BasketSheet({ units = [], storeSettings }: BasketSheetProps) {
   };
 
   return (
-    <Sheet open={isBasketOpen} onOpenChange={setIsBasketOpen}>
-      <SheetContent className="flex flex-col p-0">
-        <SheetHeader>
-          <SheetTitle className="flex items-center gap-2">
-            <ShoppingCart className="h-5 w-5" />
-            Kosár
-            {itemCount > 0 && (
-              <span className="text-sm font-normal text-gray-500">
-                ({itemCount} tétel)
-              </span>
-            )}
-          </SheetTitle>
-        </SheetHeader>
+    <>
+      <Sheet open={isBasketOpen} onOpenChange={setIsBasketOpen}>
+        <SheetContent className="flex flex-col p-0">
+          <SheetHeader>
+            <SheetTitle className="flex items-center gap-2">
+              <ShoppingCart className="h-5 w-5" />
+              Kosár
+              {itemCount > 0 && (
+                <span className="text-sm font-normal text-gray-500">
+                  ({itemCount} tétel)
+                </span>
+              )}
+            </SheetTitle>
+          </SheetHeader>
 
-        {items.length > 0 && currentStep !== "success" && renderStepIndicator()}
+          {items.length > 0 && currentStep !== "success" && renderStepIndicator()}
 
-        {currentStep === "basket" && renderBasketItems()}
-        {currentStep === "shipping" && renderShippingForm()}
-        {currentStep === "billing" && renderBillingForm()}
-        {currentStep === "success" && renderSuccess()}
+          {currentStep === "basket" && renderBasketItems()}
+          {currentStep === "shipping" && renderShippingForm()}
+          {currentStep === "billing" && renderBillingForm()}
+          {currentStep === "success" && renderSuccess()}
 
-        {renderFooter()}
-      </SheetContent>
-    </Sheet>
+          {renderFooter()}
+        </SheetContent>
+      </Sheet>
+
+      {/* Terms Modal - rendered outside Sheet to avoid z-index issues */}
+      {renderTermsModal()}
+    </>
   );
 }

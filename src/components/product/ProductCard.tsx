@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Package, ChevronLeft, ChevronRight, Eye, Scale, Wine } from 'lucide-react';
+import { Package, ChevronLeft, ChevronRight, Eye, Scale, Wine, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { Product, Unit, Category } from '@/types';
 
@@ -159,6 +159,14 @@ export function ProductCard({ product, unit, category, onAddToBasket, className 
 
       {/* Badges container - top right */}
       <div className="absolute top-3 right-3 flex flex-col gap-1.5 items-end">
+        {/* Variants badge */}
+        {product.variants && product.variants.length > 0 && (
+          <div className="bg-[#1B5E4B] text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+            <Layers className="h-3 w-3" />
+            {product.variants.length} típus
+          </div>
+        )}
+        
         {/* Image count badge */}
         {hasMultipleImages && (
           <div className="bg-black/60 text-white text-xs px-2 py-1 rounded-full">

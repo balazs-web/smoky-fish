@@ -4,12 +4,13 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { Package, ArrowLeft, Minus, Plus, ChevronLeft, ChevronRight, Scale, Wine, AlertTriangle } from 'lucide-react';
+import { Package, ArrowLeft, Minus, Plus, ChevronLeft, ChevronRight, Scale, Wine, AlertTriangle, Layers, Check } from 'lucide-react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { useBasket } from '@/contexts/BasketContext';
 import { getProducts, getUnits, getCategories } from '@/lib/store-service';
+import type { ProductVariant } from '@/types';
 
 export default function ProductPage() {
   const params = useParams();
@@ -18,6 +19,7 @@ export default function ProductPage() {
   const [quantity, setQuantity] = useState(1);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [addedToCart, setAddedToCart] = useState(false);
+  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   
   const { addItem } = useBasket();
 
@@ -60,10 +62,22 @@ export default function ProductPage() {
 
   const handleAddToBasket = () => {
     if (product) {
-      addItem(product, quantity);
+      // If product has variants but none selected, don't add
+      if (product.variants && product.variants.length > 0 && !selectedVariant) {
+        return;
+      }
+      addItem(product, quantity, selectedVariant || undefined);
       setAddedToCart(true);
       setTimeout(() => setAddedToCart(false), 2000);
     }
+  };
+
+  // Calculate the actual price with variant modifier
+  const getDisplayPrice = () => {
+    if (!product) return 0;
+    const basePrice = product.price;
+    const modifier = selectedVariant?.priceModifier || 0;
+    return basePrice + modifier;
   };
 
   const nextImage = () => {
@@ -222,11 +236,16 @@ export default function ProductPage() {
               {/* Price */}
               <div className="flex items-baseline gap-2">
                 <span className="text-3xl font-bold text-[#1B5E4B]">
-                  {formatPrice(product.price)} Ft
+                  {formatPrice(getDisplayPrice())} Ft
                 </span>
                 {unit && (
                   <span className="text-lg text-gray-500">
                     / {unit.name}
+                  </span>
+                )}
+                {selectedVariant?.priceModifier !== undefined && selectedVariant.priceModifier !== 0 && (
+                  <span className="text-sm text-gray-500">
+                    ({selectedVariant.priceModifier > 0 ? '+' : ''}{formatPrice(selectedVariant.priceModifier)} Ft)
                   </span>
                 )}
               </div>
@@ -235,6 +254,45 @@ export default function ProductPage() {
               {product.description && (
                 <div className="prose prose-sm max-w-none text-gray-600">
                   <p className="whitespace-pre-line">{product.description}</p>
+                </div>
+              )}
+
+              {/* Variant Selection */}
+              {product.variants && product.variants.length > 0 && (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Layers className="h-5 w-5 text-gray-600" />
+                    <label className="block text-sm font-medium text-gray-700">
+                      Válassz típust <span className="text-red-500">*</span>
+                    </label>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {product.variants.filter(v => v.isAvailable).map((variant) => (
+                      <button
+                        key={variant.id}
+                        type="button"
+                        onClick={() => setSelectedVariant(variant)}
+                        className={`relative px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all ${
+                          selectedVariant?.id === variant.id
+                            ? 'border-[#1B5E4B] bg-[#1B5E4B]/10 text-[#1B5E4B]'
+                            : 'border-gray-200 hover:border-gray-300 text-gray-700'
+                        }`}
+                      >
+                        {selectedVariant?.id === variant.id && (
+                          <Check className="absolute -top-1 -right-1 h-4 w-4 text-white bg-[#1B5E4B] rounded-full p-0.5" />
+                        )}
+                        <span>{variant.name}</span>
+                        {variant.priceModifier !== undefined && variant.priceModifier !== 0 && (
+                          <span className="ml-1 text-xs text-gray-500">
+                            ({variant.priceModifier > 0 ? '+' : ''}{formatPrice(variant.priceModifier)} Ft)
+                          </span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                  {!selectedVariant && (
+                    <p className="text-sm text-amber-600">Kérjük válassz egy típust a kosárba helyezés előtt!</p>
+                  )}
                 </div>
               )}
 
@@ -311,8 +369,9 @@ export default function ProductPage() {
                     : 'bg-[#1B5E4B] hover:bg-[#247a61]'
                 } text-white`}
                 onClick={handleAddToBasket}
+                disabled={product.variants && product.variants.length > 0 && !selectedVariant}
               >
-                {addedToCart ? '✓ Hozzáadva!' : 'Kosárba'}
+                {addedToCart ? '✓ Hozzáadva!' : selectedVariant ? `Kosárba: ${selectedVariant.name}` : 'Kosárba'}
               </Button>
 
               {/* Additional Info */}

@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Pencil, Trash2, Star, Package } from 'lucide-react';
+import { Plus, Pencil, Trash2, Star, Package, X, Layers } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -48,7 +48,7 @@ import {
 } from '@/lib/store-service';
 import { generateSlug } from '@/lib/slug';
 import { uploadImage, deleteImage, deleteImages } from '@/lib/storage-service';
-import type { Product, ProductFormData, Category, Unit } from '@/types';
+import type { Product, ProductFormData, Category, Unit, ProductVariant } from '@/types';
 
 const productSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -77,6 +77,8 @@ export default function ProductsPage() {
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [originalImageUrls, setOriginalImageUrls] = useState<string[]>([]);
+  const [variants, setVariants] = useState<ProductVariant[]>([]);
+  const [newVariantName, setNewVariantName] = useState('');
 
   const { data: products = [], isLoading: productsLoading } = useQuery({
     queryKey: ['products'],
@@ -150,6 +152,8 @@ export default function ProductsPage() {
     setEditingProduct(null);
     setImageUrls([]);
     setOriginalImageUrls([]);
+    setVariants([]);
+    setNewVariantName('');
     form.reset({
       name: '',
       slug: '',
@@ -174,6 +178,8 @@ export default function ProductsPage() {
     ].filter(Boolean) as string[];
     setImageUrls(existingImages);
     setOriginalImageUrls(existingImages);
+    setVariants(product.variants || []);
+    setNewVariantName('');
     form.reset({
       name: product.name,
       slug: product.slug,
@@ -194,6 +200,8 @@ export default function ProductsPage() {
     setEditingProduct(null);
     setImageUrls([]);
     setOriginalImageUrls([]);
+    setVariants([]);
+    setNewVariantName('');
     form.reset();
   };
 
@@ -207,6 +215,7 @@ export default function ProductsPage() {
       price: Math.round(data.price * 100), // Convert to cents
       imageUrl,
       images,
+      variants: variants.length > 0 ? variants : undefined,
     };
 
     // Clean up removed images
@@ -250,6 +259,29 @@ export default function ProductsPage() {
     if (!editingProduct) {
       form.setValue('slug', generateSlug(name));
     }
+  };
+
+  // Variant management functions
+  const addVariant = () => {
+    if (!newVariantName.trim()) return;
+    const newVariant: ProductVariant = {
+      id: `variant-${Date.now()}`,
+      name: newVariantName.trim(),
+      priceModifier: 0,
+      isAvailable: true,
+    };
+    setVariants([...variants, newVariant]);
+    setNewVariantName('');
+  };
+
+  const removeVariant = (variantId: string) => {
+    setVariants(variants.filter((v) => v.id !== variantId));
+  };
+
+  const updateVariant = (variantId: string, updates: Partial<ProductVariant>) => {
+    setVariants(variants.map((v) => 
+      v.id === variantId ? { ...v, ...updates } : v
+    ));
   };
 
   const getCategoryName = (categoryId: string): string => {
@@ -363,6 +395,12 @@ export default function ProductsPage() {
                             {product.name}
                             {product.isFeatured && (
                               <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                            )}
+                            {product.variants && product.variants.length > 0 && (
+                              <Badge variant="outline" className="text-xs">
+                                <Layers className="w-3 h-3 mr-1" />
+                                {product.variants.length} változat
+                              </Badge>
                             )}
                           </p>
                           <p className="text-sm text-gray-500 truncate max-w-xs">
@@ -565,6 +603,81 @@ export default function ProductsPage() {
                 maxImages={3}
                 disabled={isSubmitting}
               />
+            </div>
+
+            {/* Product Variants/Subtypes */}
+            <div className="space-y-3 rounded-lg border border-gray-200 bg-gray-50 p-4">
+              <div className="flex items-center gap-2">
+                <Layers className="h-4 w-4 text-gray-600" />
+                <Label className="text-sm font-medium">Termék változatok (opcionális)</Label>
+              </div>
+              <p className="text-xs text-gray-500">
+                Adj hozzá változatokat, ha a terméknek több típusa van (pl. különböző ízek, fajták).
+              </p>
+              
+              {/* Add new variant */}
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Változat neve (pl. Natúr, Füstölt...)"
+                  value={newVariantName}
+                  onChange={(e) => setNewVariantName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      addVariant();
+                    }
+                  }}
+                  className="flex-1"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={addVariant}
+                  disabled={!newVariantName.trim()}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+
+              {/* Existing variants */}
+              {variants.length > 0 && (
+                <div className="space-y-2 mt-3">
+                  {variants.map((variant) => (
+                    <div
+                      key={variant.id}
+                      className="flex items-center gap-2 rounded-md border bg-white p-2"
+                    >
+                      <span className="flex-1 text-sm font-medium">{variant.name}</span>
+                      <div className="flex items-center gap-1">
+                        <Input
+                          type="number"
+                          placeholder="Ár +/-"
+                          value={variant.priceModifier ? variant.priceModifier / 100 : ''}
+                          onChange={(e) => updateVariant(variant.id, { 
+                            priceModifier: e.target.value ? Math.round(parseFloat(e.target.value) * 100) : 0 
+                          })}
+                          className="w-20 h-8 text-xs"
+                        />
+                        <span className="text-xs text-gray-500">Ft</span>
+                      </div>
+                      <Switch
+                        checked={variant.isAvailable}
+                        onCheckedChange={(checked) => updateVariant(variant.id, { isAvailable: checked })}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeVariant(variant.id)}
+                        className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="flex items-center gap-6">

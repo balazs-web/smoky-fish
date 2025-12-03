@@ -8,11 +8,12 @@ import {
   useEffect,
   type ReactNode,
 } from "react";
-import type { Product } from "@/types";
+import type { Product, ProductVariant } from "@/types";
 
 export interface BasketItem {
   product: Product;
   quantity: number;
+  variant?: ProductVariant; // Optional selected variant
 }
 
 export interface ShippingAddress {
@@ -45,9 +46,9 @@ interface BasketContextType {
   itemCount: number; // Number of unique items (lines)
   totalQuantity: number; // Total quantity of all items
   totalPrice: number; // Total price in cents
-  addItem: (product: Product, quantity?: number) => void;
-  removeItem: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  addItem: (product: Product, quantity?: number, variant?: ProductVariant) => void;
+  removeItem: (productId: string, variantId?: string) => void;
+  updateQuantity: (productId: string, quantity: number, variantId?: string) => void;
   clearBasket: () => void;
   isBasketOpen: boolean;
   setIsBasketOpen: (open: boolean) => void;
@@ -124,10 +125,11 @@ export function BasketProvider({ children }: { children: ReactNode }) {
     }
   }, [items, isHydrated]);
 
-  const addItem = useCallback((product: Product, quantity = 1) => {
+  const addItem = useCallback((product: Product, quantity = 1, variant?: ProductVariant) => {
     setItems((prevItems) => {
+      // Match by product ID and variant ID (if applicable)
       const existingIndex = prevItems.findIndex(
-        (item) => item.product.id === product.id
+        (item) => item.product.id === product.id && item.variant?.id === variant?.id
       );
 
       if (existingIndex >= 0) {
@@ -139,27 +141,33 @@ export function BasketProvider({ children }: { children: ReactNode }) {
         return newItems;
       }
 
-      return [...prevItems, { product, quantity }];
+      return [...prevItems, { product, quantity, variant }];
     });
   }, []);
 
-  const removeItem = useCallback((productId: string) => {
+  const removeItem = useCallback((productId: string, variantId?: string) => {
     setItems((prevItems) =>
-      prevItems.filter((item) => item.product.id !== productId)
+      prevItems.filter((item) => 
+        !(item.product.id === productId && item.variant?.id === variantId)
+      )
     );
   }, []);
 
-  const updateQuantity = useCallback((productId: string, quantity: number) => {
+  const updateQuantity = useCallback((productId: string, quantity: number, variantId?: string) => {
     if (quantity <= 0) {
       setItems((prevItems) =>
-        prevItems.filter((item) => item.product.id !== productId)
+        prevItems.filter((item) => 
+          !(item.product.id === productId && item.variant?.id === variantId)
+        )
       );
       return;
     }
 
     setItems((prevItems) =>
       prevItems.map((item) =>
-        item.product.id === productId ? { ...item, quantity } : item
+        (item.product.id === productId && item.variant?.id === variantId)
+          ? { ...item, quantity } 
+          : item
       )
     );
   }, []);
@@ -173,7 +181,12 @@ export function BasketProvider({ children }: { children: ReactNode }) {
   const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
 
   const totalPrice = items.reduce(
-    (sum, item) => sum + item.product.price * item.quantity,
+    (sum, item) => {
+      const basePrice = item.product.price;
+      const priceModifier = item.variant?.priceModifier || 0;
+      const itemPrice = basePrice + priceModifier;
+      return sum + itemPrice * item.quantity;
+    },
     0
   );
 

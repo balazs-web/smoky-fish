@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { getUnits, getStoreSettings } from "@/lib/store-service";
+import { getUnits, getStoreSettings, getCategories } from "@/lib/store-service";
 import { BasketSheet } from "./BasketSheet";
 
 export function GlobalBasket() {
@@ -15,5 +15,10 @@ export function GlobalBasket() {
     queryFn: getStoreSettings,
   });
 
-  return <BasketSheet units={units} storeSettings={storeSettings} />;
+  const { data: categories = [] } = useQuery({
+    queryKey: ["categories"],
+    queryFn: getCategories,
+  });
+
+  return <BasketSheet units={units} storeSettings={storeSettings} categories={categories} />;
 }

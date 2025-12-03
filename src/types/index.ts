@@ -25,6 +25,14 @@ export interface Category {
   updatedAt: Date;
 }
 
+// Product variant/subtype (e.g., different cheese types within one product)
+export interface ProductVariant {
+  id: string;
+  name: string; // e.g., "Natúr", "Füstölt", "Fűszeres"
+  priceModifier?: number; // Optional price difference in cents (can be negative or positive)
+  isAvailable: boolean;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -35,6 +43,7 @@ export interface Product {
   unitId: string; // Reference to Unit
   imageUrl?: string;
   images?: string[];
+  variants?: ProductVariant[]; // Optional subtypes/variants
   isFeatured: boolean;
   isActive: boolean;
   stock: number;

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Check, Minus, Plus, ShoppingCart } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Check, Minus, Plus, ShoppingCart, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,7 +12,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useBasket } from "@/contexts/BasketContext";
-import type { Product, Unit } from "@/types";
+import type { Product, Unit, ProductVariant } from "@/types";
 
 interface AddToBasketModalProps {
   product: Product | null;
@@ -29,7 +29,14 @@ export function AddToBasketModal({
 }: AddToBasketModalProps) {
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
+  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const { addItem, setIsBasketOpen } = useBasket();
+
+  // Reset selected variant when product changes
+  useEffect(() => {
+    setSelectedVariant(null);
+    setQuantity(1);
+  }, [product?.id]);
 
   const formatPrice = (priceInCents: number): string => {
     return (priceInCents / 100).toLocaleString("hu-HU");
@@ -37,11 +44,16 @@ export function AddToBasketModal({
 
   const handleAddToBasket = () => {
     if (product) {
-      addItem(product, quantity);
+      // If product has variants but none selected, don't add
+      if (hasVariants && !selectedVariant) {
+        return;
+      }
+      addItem(product, quantity, selectedVariant || undefined);
       setIsAdded(true);
       setTimeout(() => {
         setIsAdded(false);
         setQuantity(1);
+        setSelectedVariant(null);
         onClose();
       }, 800);
     }
@@ -65,7 +77,10 @@ export function AddToBasketModal({
   if (!product) return null;
 
   const imageUrl = product.imageUrl || product.images?.[0];
-  const totalPrice = product.price * quantity;
+  const hasVariants = product.variants && product.variants.length > 0;
+  const availableVariants = product.variants?.filter(v => v.isAvailable) || [];
+  const basePrice = product.price + (selectedVariant?.priceModifier || 0);
+  const totalPrice = basePrice * quantity;
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -100,7 +115,7 @@ export function AddToBasketModal({
                 {product.name}
               </h3>
               <p className="mt-1 text-lg font-bold text-[#1B5E4B]">
-                {formatPrice(product.price)} Ft
+                {formatPrice(basePrice)} Ft
                 {unit && (
                   <span className="text-sm font-normal text-gray-500 ml-1">
                     / {unit.name}
@@ -108,6 +123,40 @@ export function AddToBasketModal({
                 )}
               </p>
             </div>
+
+            {/* Variant Selection */}
+            {hasVariants && availableVariants.length > 0 && (
+              <div className="col-span-2 mt-2">
+                <div className="flex items-center gap-2 mb-2">
+                  <Layers className="h-4 w-4 text-gray-500" />
+                  <span className="text-sm text-gray-600">Típus:</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {availableVariants.map((variant) => (
+                    <button
+                      key={variant.id}
+                      type="button"
+                      onClick={() => setSelectedVariant(variant)}
+                      className={`px-3 py-1.5 rounded-lg border text-sm font-medium transition-all ${
+                        selectedVariant?.id === variant.id
+                          ? 'border-[#1B5E4B] bg-[#1B5E4B]/10 text-[#1B5E4B]'
+                          : 'border-gray-200 hover:border-gray-300 text-gray-700'
+                      }`}
+                    >
+                      {variant.name}
+                      {variant.priceModifier !== undefined && variant.priceModifier !== 0 && (
+                        <span className="ml-1 text-xs text-gray-500">
+                          ({variant.priceModifier > 0 ? '+' : ''}{formatPrice(variant.priceModifier)} Ft)
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+                {!selectedVariant && (
+                  <p className="text-xs text-amber-600 mt-2">Válassz egy típust!</p>
+                )}
+              </div>
+            )}
 
             {/* Quantity Selector */}
             <div className="flex items-center gap-3 mt-2">
@@ -154,7 +203,7 @@ export function AddToBasketModal({
           </Button>
           <Button
             onClick={handleAddToBasket}
-            disabled={isAdded}
+            disabled={isAdded || (hasVariants && !selectedVariant)}
             className="w-full sm:w-auto bg-[#1B5E4B] hover:bg-[#247a61] text-white"
           >
             {isAdded ? (
@@ -165,7 +214,7 @@ export function AddToBasketModal({
             ) : (
               <>
                 <ShoppingCart className="h-4 w-4 mr-2" />
-                Kosárba
+                {selectedVariant ? `Kosárba: ${selectedVariant.name}` : 'Kosárba'}
               </>
             )}
           </Button>

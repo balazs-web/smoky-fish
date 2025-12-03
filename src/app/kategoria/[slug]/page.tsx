@@ -8,6 +8,7 @@ import { Package, ArrowLeft } from 'lucide-react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
+import { ProductCard } from '@/components/product/ProductCard';
 import { AddToBasketModal } from '@/components/basket/AddToBasketModal';
 import { getProducts, getUnits, getCategories } from '@/lib/store-service';
 import type { Product, Unit } from '@/types';
@@ -49,15 +50,6 @@ export default function CategoryPage() {
 
   const getUnit = (unitId: string): Unit | undefined => {
     return units.find((u) => u.id === unitId);
-  };
-
-  const getUnitName = (unitId: string): string => {
-    const unit = units.find((u) => u.id === unitId);
-    return unit?.name || '';
-  };
-
-  const formatPrice = (priceInCents: number): string => {
-    return (priceInCents / 100).toLocaleString('hu-HU');
   };
 
   const isLoading = productsLoading || categoriesLoading;
@@ -154,62 +146,16 @@ export default function CategoryPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {products.map((product) => {
-              const imageUrl = product.imageUrl || product.images?.[0];
-              
-              return (
-                <div
-                  key={product.id}
-                  className="group bg-white rounded-2xl overflow-hidden shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
-                >
-                  {/* Product Image - Clickable */}
-                  <Link href={`/termek/${product.slug}`}>
-                    <div className="aspect-square overflow-hidden bg-gray-100">
-                      {imageUrl ? (
-                        <img
-                          src={imageUrl}
-                          alt={product.name}
-                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
-                      ) : (
-                        <div className="h-full w-full flex items-center justify-center">
-                          <Package className="h-12 w-12 text-gray-300" />
-                        </div>
-                      )}
-                    </div>
-                  </Link>
-
-                  {/* Product Info */}
-                  <div className="p-4">
-                    <Link href={`/termek/${product.slug}`}>
-                      <h3 className="text-sm font-medium text-gray-900 line-clamp-2 min-h-[40px] hover:text-[#1B5E4B] transition-colors">
-                        {product.name}
-                      </h3>
-                    </Link>
-                    
-                    {/* Price */}
-                    <div className="mt-2 mb-4">
-                      <span className="text-xl font-bold text-[#1B5E4B]">
-                        {formatPrice(product.price)} Ft
-                      </span>
-                      {product.unitId && (
-                        <span className="text-sm text-gray-500 ml-1">
-                          / {getUnitName(product.unitId)}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Add to Cart Button */}
-                    <Button 
-                      className="w-full bg-[#1B5E4B] hover:bg-[#247a61] text-white"
-                      onClick={() => handleAddToBasket(product)}
-                    >
-                      Kosárba
-                    </Button>
-                  </div>
-                </div>
-              );
-            })}
+            {products.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                unit={getUnit(product.unitId)}
+                category={category}
+                onAddToBasket={handleAddToBasket}
+                className="bg-white"
+              />
+            ))}
           </div>
         )}
       </div>
