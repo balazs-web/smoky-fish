@@ -18,6 +18,9 @@ export interface Category {
   imageUrl?: string;
   order: number;
   isActive: boolean;
+  // Warning flags for all products in this category
+  hasApproximateWeight?: boolean; // Weight only known when packed
+  isAlcohol18Plus?: boolean; // Age restriction for alcohol
   createdAt: Date;
   updatedAt: Date;
 }

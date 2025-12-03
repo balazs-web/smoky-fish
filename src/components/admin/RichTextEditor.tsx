@@ -414,6 +414,43 @@ function Toolbar({ editor }: { editor: Editor }) {
 }
 
 export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorProps) {
+  const [isUploading, setIsUploading] = useState(false);
+
+  // Handle pasted images - upload to Firebase
+  const handlePaste = useCallback((view: any, event: ClipboardEvent): boolean => {
+    const items = event.clipboardData?.items;
+    if (!items) return false;
+
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        const file = item.getAsFile();
+        if (!file) continue;
+
+        event.preventDefault();
+        setIsUploading(true);
+        
+        // Upload async but return synchronously
+        uploadImage(file, 'blog/content')
+          .then((url) => {
+            view.dispatch(
+              view.state.tr.replaceSelectionWith(
+                view.state.schema.nodes.image.create({ src: url })
+              )
+            );
+          })
+          .catch((error) => {
+            console.error('Failed to upload pasted image:', error);
+          })
+          .finally(() => {
+            setIsUploading(false);
+          });
+        
+        return true;
+      }
+    }
+    return false;
+  }, []);
+
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -463,6 +500,7 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
           '[&_.tip-box]:bg-[#FEF3C7]/10 [&_.tip-box]:border-l-4 [&_.tip-box]:border-[#C89A63] [&_.tip-box]:p-4 [&_.tip-box]:rounded-r-lg [&_.tip-box]:my-4 ' +
           '[&_.promo-box]:bg-[#C89A63]/10 [&_.promo-box]:p-4 [&_.promo-box]:rounded-lg [&_.promo-box]:my-4',
       },
+      handlePaste: handlePaste,
     },
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
@@ -483,9 +521,17 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
   }
 
   return (
-    <div className="rounded-lg border border-neutral-700 bg-neutral-800 overflow-hidden">
+    <div className="rounded-lg border border-neutral-700 bg-neutral-800 overflow-hidden relative">
       <Toolbar editor={editor} />
       <EditorContent editor={editor} />
+      {isUploading && (
+        <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-neutral-800 rounded-lg px-6 py-4 flex items-center gap-3">
+            <div className="w-5 h-5 border-2 border-[#C89A63] border-t-transparent rounded-full animate-spin" />
+            <span className="text-neutral-200 text-sm">Kép feltöltése...</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

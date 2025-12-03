@@ -81,7 +81,7 @@ export default function Home() {
                 <a href={hero.secondaryCtaHref}>
                   <Button
                     variant="outline"
-                    className="border-white/60 bg-transparent text-white hover:bg-white/10"
+                    className="border-white/60 bg-transparent text-white hover:bg-white/20 hover:text-white hover:border-white"
                   >
                     {hero.secondaryCtaLabel}
                   </Button>
@@ -90,7 +90,7 @@ export default function Home() {
                 <Link href={hero.secondaryCtaHref || "/"}>
                   <Button
                     variant="outline"
-                    className="border-white/60 bg-transparent text-white hover:bg-white/10"
+                    className="border-white/60 bg-transparent text-white hover:bg-white/20 hover:text-white hover:border-white"
                   >
                     {hero.secondaryCtaLabel}
                   </Button>

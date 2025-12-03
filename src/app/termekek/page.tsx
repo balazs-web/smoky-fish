@@ -6,10 +6,10 @@ import Link from 'next/link';
 import { Package, ArrowLeft } from 'lucide-react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
-import { Button } from '@/components/ui/button';
 import { AddToBasketModal } from '@/components/basket/AddToBasketModal';
+import { ProductCard } from '@/components/product/ProductCard';
 import { getProducts, getUnits, getCategories } from '@/lib/store-service';
-import type { Product, Unit } from '@/types';
+import type { Product, Unit, Category } from '@/types';
 
 export default function AllProductsPage() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -43,20 +43,6 @@ export default function AllProductsPage() {
     return units.find((u) => u.id === unitId);
   };
 
-  const getUnitName = (unitId: string): string => {
-    const unit = units.find((u) => u.id === unitId);
-    return unit?.name || '';
-  };
-
-  const getCategoryName = (categoryId: string): string => {
-    const category = categories.find((c) => c.id === categoryId);
-    return category?.name || '';
-  };
-
-  const formatPrice = (priceInCents: number): string => {
-    return (priceInCents / 100).toLocaleString('hu-HU');
-  };
-
   return (
     <div className="min-h-screen bg-[#F5F3EF]">
       <Navbar />
@@ -78,7 +64,7 @@ export default function AllProductsPage() {
         </div>
       </div>
 
-      {/* Products Grid */}
+      {/* Products by Category */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
         {productsLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -98,70 +84,63 @@ export default function AllProductsPage() {
             <p className="mt-2 text-gray-500">Jelenleg nincsenek elérhető termékek.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {products.map((product) => {
-              const imageUrl = product.imageUrl || product.images?.[0];
-              
-              return (
-                <div
-                  key={product.id}
-                  className="group bg-white rounded-2xl overflow-hidden shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
-                >
-                  {/* Product Image - Clickable */}
-                  <Link href={`/termek/${product.slug}`}>
-                    <div className="aspect-square overflow-hidden bg-gray-100">
-                      {imageUrl ? (
-                        <img
-                          src={imageUrl}
-                          alt={product.name}
-                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          <div className="space-y-12">
+            {/* Group products by category */}
+            {categories
+              .filter((category) => products.some((p) => p.categoryId === category.id))
+              .map((category) => {
+                const categoryProducts = products.filter((p) => p.categoryId === category.id);
+                
+                return (
+                  <section key={category.id} id={`category-${category.slug}`}>
+                    <div className="flex items-center justify-center gap-4 mb-6">
+                      <h2 className="text-2xl font-bold text-gray-900">{category.name}</h2>
+                      <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                        {categoryProducts.length} termék
+                      </span>
+                    </div>
+                    
+                    <div className="flex flex-wrap justify-center gap-6">
+                      {categoryProducts.map((product) => (
+                        <ProductCard
+                          key={product.id}
+                          product={product}
+                          unit={getUnit(product.unitId)}
+                          category={category}
+                          onAddToBasket={handleAddToBasket}
+                          className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] max-w-[280px]"
                         />
-                      ) : (
-                        <div className="h-full w-full flex items-center justify-center">
-                          <Package className="h-12 w-12 text-gray-300" />
-                        </div>
-                      )}
+                      ))}
                     </div>
-                  </Link>
-
-                  {/* Product Info */}
-                  <div className="p-4">
-                    {/* Category Badge */}
-                    {product.categoryId && (
-                      <span className="inline-block text-xs font-medium text-[#1B5E4B] bg-[#1B5E4B]/10 px-2 py-1 rounded mb-2">
-                        {getCategoryName(product.categoryId)}
-                      </span>
-                    )}
-                    
-                    <Link href={`/termek/${product.slug}`}>
-                      <h3 className="text-sm font-medium text-gray-900 line-clamp-2 min-h-[40px] hover:text-[#1B5E4B] transition-colors">
-                        {product.name}
-                      </h3>
-                    </Link>
-                    
-                    {/* Price */}
-                    <div className="mt-2 mb-4">
-                      <span className="text-xl font-bold text-[#1B5E4B]">
-                        {formatPrice(product.price)} Ft
-                      </span>
-                      {product.unitId && (
-                        <span className="text-sm text-gray-500 ml-1">
-                          / {getUnitName(product.unitId)}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Add to Cart Button */}
-                    <Button 
-                      className="w-full bg-[#1B5E4B] hover:bg-[#247a61] text-white"
-                      onClick={() => handleAddToBasket(product)}
-                    >
-                      Kosárba
-                    </Button>
-                  </div>
+                  </section>
+                );
+              })}
+            
+            {/* Products without category */}
+            {products.filter((p) => !p.categoryId).length > 0 && (
+              <section id="category-other">
+                <div className="flex items-center justify-center gap-4 mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900">Egyéb termékek</h2>
+                  <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                    {products.filter((p) => !p.categoryId).length} termék
+                  </span>
                 </div>
-              );
-            })}
+                
+                <div className="flex flex-wrap justify-center gap-6">
+                  {products
+                    .filter((p) => !p.categoryId)
+                    .map((product) => (
+                      <ProductCard
+                        key={product.id}
+                        product={product}
+                        unit={getUnit(product.unitId)}
+                        onAddToBasket={handleAddToBasket}
+                        className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] max-w-[280px]"
+                      />
+                    ))}
+                </div>
+              </section>
+            )}
           </div>
         )}
       </div>

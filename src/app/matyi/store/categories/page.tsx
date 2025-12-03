@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Pencil, Trash2, GripVertical, FolderTree } from 'lucide-react';
+import { Plus, Pencil, Trash2, GripVertical, FolderTree, Scale, Wine } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -48,6 +48,8 @@ const categorySchema = z.object({
   imageUrl: z.string().optional(),
   order: z.number().min(0),
   isActive: z.boolean(),
+  hasApproximateWeight: z.boolean().optional(),
+  isAlcohol18Plus: z.boolean().optional(),
 });
 
 type CategoryFormValues = z.infer<typeof categorySchema>;
@@ -74,6 +76,8 @@ export default function CategoriesPage() {
       imageUrl: '',
       order: 0,
       isActive: true,
+      hasApproximateWeight: false,
+      isAlcohol18Plus: false,
     },
   });
 
@@ -120,6 +124,8 @@ export default function CategoriesPage() {
       imageUrl: '',
       order: categories.length,
       isActive: true,
+      hasApproximateWeight: false,
+      isAlcohol18Plus: false,
     });
     setDialogOpen(true);
   };
@@ -135,6 +141,8 @@ export default function CategoriesPage() {
       imageUrl: category.imageUrl || '',
       order: category.order,
       isActive: category.isActive,
+      hasApproximateWeight: category.hasApproximateWeight || false,
+      isAlcohol18Plus: category.isAlcohol18Plus || false,
     });
     setDialogOpen(true);
   };
@@ -253,9 +261,23 @@ export default function CategoriesPage() {
                     </TableCell>
                     <TableCell className="text-gray-500">{category.slug}</TableCell>
                     <TableCell>
-                      <Badge variant={category.isActive ? 'default' : 'secondary'}>
-                        {category.isActive ? 'Active' : 'Inactive'}
-                      </Badge>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Badge variant={category.isActive ? 'default' : 'secondary'}>
+                          {category.isActive ? 'Active' : 'Inactive'}
+                        </Badge>
+                        {category.hasApproximateWeight && (
+                          <Badge variant="outline" className="border-amber-300 text-amber-700 bg-amber-50">
+                            <Scale className="h-3 w-3 mr-1" />
+                            ~súly
+                          </Badge>
+                        )}
+                        {category.isAlcohol18Plus && (
+                          <Badge variant="outline" className="border-red-300 text-red-700 bg-red-50">
+                            <Wine className="h-3 w-3 mr-1" />
+                            18+
+                          </Badge>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
@@ -359,6 +381,33 @@ export default function CategoriesPage() {
                 onCheckedChange={(checked) => form.setValue('isActive', checked)}
               />
               <Label htmlFor="isActive">Active</Label>
+            </div>
+
+            {/* Category Warnings */}
+            <div className="space-y-3 rounded-lg border border-amber-200 bg-amber-50 p-4">
+              <p className="text-sm font-medium text-amber-800">Figyelmeztetések a kategória termékeihez</p>
+              
+              <div className="flex items-center gap-2">
+                <Switch
+                  id="hasApproximateWeight"
+                  checked={form.watch('hasApproximateWeight') || false}
+                  onCheckedChange={(checked) => form.setValue('hasApproximateWeight', checked)}
+                />
+                <Label htmlFor="hasApproximateWeight" className="text-sm text-amber-900">
+                  ⚖️ Hozzávetőleges súly (csomagoláskor derül ki)
+                </Label>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Switch
+                  id="isAlcohol18Plus"
+                  checked={form.watch('isAlcohol18Plus') || false}
+                  onCheckedChange={(checked) => form.setValue('isAlcohol18Plus', checked)}
+                />
+                <Label htmlFor="isAlcohol18Plus" className="text-sm text-amber-900">
+                  🍷 Alkohol - csak 18 éven felülieknek
+                </Label>
+              </div>
             </div>
 
             <DialogFooter>

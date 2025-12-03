@@ -17,6 +17,7 @@ import {
   ExternalLink,
   Image as ImageIcon,
   ChevronLeft,
+  HelpCircle,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -474,13 +475,22 @@ export default function BlogAdminPage() {
               Blog kezelés
             </h1>
           </div>
-          <Button
-            onClick={handleCreate}
-            className="bg-[#C89A63] text-black hover:bg-[#b8864f]"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Új cikk
-          </Button>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/matyi/user-guides/blog"
+              className="flex items-center gap-2 px-3 py-2 text-sm text-neutral-400 hover:text-neutral-200 transition-colors rounded-lg hover:bg-neutral-800"
+            >
+              <HelpCircle className="h-4 w-4" />
+              Használati útmutató
+            </Link>
+            <Button
+              onClick={handleCreate}
+              className="bg-[#C89A63] text-black hover:bg-[#b8864f]"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Új cikk
+            </Button>
+          </div>
         </div>
       </header>
 

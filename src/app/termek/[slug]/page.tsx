@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { Package, ArrowLeft, Minus, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Package, ArrowLeft, Minus, Plus, ChevronLeft, ChevronRight, Scale, Wine, AlertTriangle } from 'lucide-react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
@@ -234,7 +234,35 @@ export default function ProductPage() {
               {/* Description */}
               {product.description && (
                 <div className="prose prose-sm max-w-none text-gray-600">
-                  <p>{product.description}</p>
+                  <p className="whitespace-pre-line">{product.description}</p>
+                </div>
+              )}
+
+              {/* Category Warnings */}
+              {(category?.hasApproximateWeight || category?.isAlcohol18Plus) && (
+                <div className="space-y-2">
+                  {category?.hasApproximateWeight && (
+                    <div className="flex items-start gap-3 rounded-lg bg-amber-50 border border-amber-200 p-3">
+                      <Scale className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-medium text-amber-800">Hozzávetőleges súly</p>
+                        <p className="text-sm text-amber-700">
+                          A termék pontos súlya csomagoláskor derül ki. A végső ár a tényleges súly alapján kerül kiszámításra.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  {category?.isAlcohol18Plus && (
+                    <div className="flex items-start gap-3 rounded-lg bg-red-50 border border-red-200 p-3">
+                      <Wine className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-medium text-red-800">Csak 18 éven felülieknek</p>
+                        <p className="text-sm text-red-700">
+                          Ez a termék alkoholtartalmú. Vásárláshoz és átvételhez 18 éves kor feletti életkor szükséges.
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 

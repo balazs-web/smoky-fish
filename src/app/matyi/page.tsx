@@ -396,26 +396,26 @@ export default function MatyiAdminPage() {
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-50">
       <header className="border-b border-neutral-800 bg-black/80 px-6 py-4">
-        <div className="mx-auto flex max-w-6xl items-center justify-between">
+        <div className="mx-auto flex max-w-6xl items-center justify-between pr-48">
           <h1 className="text-lg font-semibold tracking-tight">
             Matyi admin / CRM
           </h1>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <a
               href="/matyi/store"
-              className="text-xs text-neutral-400 hover:text-[#C89A63] transition-colors"
+              className="rounded-md bg-neutral-800 px-4 py-2 text-sm font-medium text-neutral-200 hover:bg-[#C89A63] hover:text-black transition-colors"
             >
               🏪 Áruház
             </a>
             <a
               href="/matyi/blog"
-              className="text-xs text-neutral-400 hover:text-[#C89A63] transition-colors"
+              className="rounded-md bg-neutral-800 px-4 py-2 text-sm font-medium text-neutral-200 hover:bg-[#C89A63] hover:text-black transition-colors"
             >
               📝 Blog
             </a>
             <a
               href="/matyi/legal"
-              className="text-xs text-neutral-400 hover:text-[#C89A63] transition-colors"
+              className="rounded-md bg-neutral-800 px-4 py-2 text-sm font-medium text-neutral-200 hover:bg-[#C89A63] hover:text-black transition-colors"
             >
               📄 Jogi oldalak
             </a>
@@ -651,7 +651,7 @@ export default function MatyiAdminPage() {
                 </Button>
                 <Button
                   variant="outline"
-                  className="border-white/60 bg-transparent text-white hover:bg-white/10"
+                  className="border-white/60 bg-transparent text-white hover:bg-white/20 hover:text-white hover:border-white"
                 >
                   {previewHero.secondaryCtaLabel}
                 </Button>
