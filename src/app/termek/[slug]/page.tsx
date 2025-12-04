@@ -41,9 +41,9 @@ export default function ProductPage() {
   // Find the current product (only if active)
   const product = allProducts.find((p) => p.slug === slug && p.isActive);
   
-  // Get all images
+  // Get all images (filtering out empty/whitespace-only URLs)
   const allImages = product 
-    ? [product.imageUrl, ...(product.images || [])].filter(Boolean) as string[]
+    ? [product.imageUrl, ...(product.images || [])].filter((url): url is string => Boolean(url?.trim()))
     : [];
 
   // Find category
@@ -303,9 +303,9 @@ export default function ProductPage() {
                     <div className="flex items-start gap-3 rounded-lg bg-amber-50 border border-amber-200 p-3">
                       <Scale className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
                       <div>
-                        <p className="font-medium text-amber-800">Hozzávetőleges súly</p>
+                        <p className="font-medium text-amber-800">Hozzávetőleges tömeg</p>
                         <p className="text-sm text-amber-700">
-                          A termék pontos súlya csomagoláskor derül ki. A végső ár a tényleges súly alapján kerül kiszámításra.
+                          A termék pontos tömege csomagoláskor derül ki. A végső ár a tényleges tömeg alapján kerül kiszámításra.
                         </p>
                       </div>
                     </div>

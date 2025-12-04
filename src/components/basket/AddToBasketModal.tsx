@@ -76,7 +76,7 @@ export function AddToBasketModal({
 
   if (!product) return null;
 
-  const imageUrl = product.imageUrl || product.images?.[0];
+  const imageUrl = product.imageUrl?.trim() || product.images?.find(img => img?.trim());
   const hasVariants = product.variants && product.variants.length > 0;
   const availableVariants = product.variants?.filter(v => v.isAvailable) || [];
   const basePrice = product.price + (selectedVariant?.priceModifier || 0);

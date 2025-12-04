@@ -1,5 +1,6 @@
 import nodemailer from "nodemailer";
 import type { BasketItem, ShippingAddress, BillingAddress } from "@/contexts/BasketContext";
+import { fetchSiteConfig } from "@/lib/siteService";
 
 // Email configuration from environment variables
 const smtpPort = parseInt(process.env.SMTP_PORT || "465");
@@ -155,7 +156,8 @@ const generateBillingHtml = (
 
 // Customer order confirmation email
 export async function sendCustomerOrderConfirmation(
-  order: OrderData
+  order: OrderData,
+  shopName: string = "Matyistore"
 ): Promise<boolean> {
   const orderDateStr = order.orderDate.toLocaleDateString("hu-HU", {
     year: "numeric",
@@ -176,7 +178,7 @@ export async function sendCustomerOrderConfirmation(
       
       <!-- Header -->
       <div style="background-color: #C89A63; padding: 24px; text-align: center; border-radius: 8px 8px 0 0;">
-        <h1 style="margin: 0; color: #000; font-size: 24px;">Matyistore</h1>
+        <h1 style="margin: 0; color: #000; font-size: 24px;">${shopName}</h1>
         <p style="margin: 8px 0 0 0; color: #000;">Grúz finomságok Magyarországon</p>
       </div>
       
@@ -230,7 +232,7 @@ export async function sendCustomerOrderConfirmation(
       
       <!-- Footer -->
       <div style="background-color: #F5F3EF; padding: 16px; text-align: center; border-radius: 0 0 8px 8px; font-size: 12px; color: #666;">
-        <p style="margin: 0;">© ${new Date().getFullYear()} Matyistore - Minden jog fenntartva</p>
+        <p style="margin: 0;">© ${new Date().getFullYear()} ${shopName} - Minden jog fenntartva</p>
       </div>
       
     </body>
@@ -239,7 +241,7 @@ export async function sendCustomerOrderConfirmation(
 
   try {
     await sendMailWithRetry({
-      from: `"Matyistore" <${fromEmail}>`,
+      from: `"${shopName}" <${fromEmail}>`,
       to: order.shippingAddress.email,
       subject: `Rendelés visszaigazolás - #${order.orderId}`,
       html,
@@ -254,7 +256,8 @@ export async function sendCustomerOrderConfirmation(
 
 // Shop manager new order notification email
 export async function sendShopManagerNotification(
-  order: OrderData
+  order: OrderData,
+  shopName: string = "Matyistore"
 ): Promise<boolean> {
   const orderDateStr = order.orderDate.toLocaleDateString("hu-HU", {
     year: "numeric",
@@ -319,7 +322,7 @@ export async function sendShopManagerNotification(
       
       <!-- Footer -->
       <div style="background-color: #F5F3EF; padding: 16px; text-align: center; border-radius: 0 0 8px 8px; font-size: 12px; color: #666;">
-        <p style="margin: 0;">Matyistore Admin Értesítés</p>
+        <p style="margin: 0;">${shopName} Admin Értesítés</p>
       </div>
       
     </body>
@@ -328,7 +331,7 @@ export async function sendShopManagerNotification(
 
   try {
     await sendMailWithRetry({
-      from: `"Matyistore Rendszer" <${fromEmail}>`,
+      from: `"${shopName} Rendszer" <${fromEmail}>`,
       to: shopManagerEmail,
       subject: `🛒 Új rendelés - #${order.orderId} - ${formatPrice(order.totalPrice)}`,
       html,
@@ -346,9 +349,18 @@ export async function sendOrderEmails(order: OrderData): Promise<{
   customerEmailSent: boolean;
   managerEmailSent: boolean;
 }> {
+  // Fetch the shop name from site config
+  let shopName = "Matyistore";
+  try {
+    const siteConfig = await fetchSiteConfig();
+    shopName = siteConfig.storeName || "Matyistore";
+  } catch (error) {
+    console.warn("Could not fetch site config for shop name, using default:", error);
+  }
+
   const [customerEmailSent, managerEmailSent] = await Promise.all([
-    sendCustomerOrderConfirmation(order),
-    sendShopManagerNotification(order),
+    sendCustomerOrderConfirmation(order, shopName),
+    sendShopManagerNotification(order, shopName),
   ]);
 
   return { customerEmailSent, managerEmailSent };

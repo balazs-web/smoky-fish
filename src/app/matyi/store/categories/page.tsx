@@ -278,7 +278,7 @@ export default function CategoriesPage() {
                         {category.hasApproximateWeight && (
                           <Badge variant="outline" className="border-amber-300 text-amber-700 bg-amber-50">
                             <Scale className="h-3 w-3 mr-1" />
-                            ~súly
+                            ~tömeg
                           </Badge>
                         )}
                         {category.isAlcohol18Plus && (
@@ -405,7 +405,7 @@ export default function CategoriesPage() {
                   onCheckedChange={(checked) => form.setValue('hasApproximateWeight', checked)}
                 />
                 <Label htmlFor="hasApproximateWeight" className="text-sm text-amber-900">
-                  ⚖️ Hozzávetőleges súly (csomagoláskor derül ki)
+                  ⚖️ Hozzávetőleges tömeg (csomagoláskor derül ki)
                 </Label>
               </div>
 

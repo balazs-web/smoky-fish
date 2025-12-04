@@ -132,15 +132,18 @@ export default function StoreDashboard() {
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
-                      {(product.imageUrl || product.images?.[0]) ? (
-                        <img
-                          src={product.imageUrl || product.images?.[0]}
-                          alt={product.name}
-                          className="w-10 h-10 object-cover"
-                        />
-                      ) : (
-                        <Package className="w-5 h-5 text-gray-400" />
-                      )}
+                      {(() => {
+                        const validImage = product.imageUrl?.trim() || product.images?.find(img => img?.trim());
+                        return validImage ? (
+                          <img
+                            src={validImage}
+                            alt={product.name}
+                            className="w-10 h-10 object-cover"
+                          />
+                        ) : (
+                          <Package className="w-5 h-5 text-gray-400" />
+                        );
+                      })()}
                     </div>
                     <div>
                       <p className="font-medium text-gray-900">{product.name}</p>

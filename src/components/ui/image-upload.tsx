@@ -24,6 +24,8 @@ export function ImageUpload({
   disabled = false,
   className,
 }: ImageUploadProps) {
+  // Filter out any empty or invalid URLs from the value
+  const validUrls = value.filter((url) => url && url.trim());
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -32,7 +34,7 @@ export function ImageUpload({
     async (files: FileList | null) => {
       if (!files || files.length === 0 || disabled) return;
 
-      const remainingSlots = maxImages - value.length;
+      const remainingSlots = maxImages - validUrls.length;
       if (remainingSlots <= 0) return;
 
       const filesToUpload = Array.from(files).slice(0, remainingSlots);
@@ -41,7 +43,7 @@ export function ImageUpload({
       try {
         const uploadPromises = filesToUpload.map((file) => onUpload(file));
         const newUrls = await Promise.all(uploadPromises);
-        onChange([...value, ...newUrls]);
+        onChange([...validUrls, ...newUrls]);
       } catch (error) {
         console.error('Upload failed:', error);
       } finally {
@@ -51,7 +53,7 @@ export function ImageUpload({
         }
       }
     },
-    [value, onChange, onUpload, maxImages, disabled]
+    [validUrls, onChange, onUpload, maxImages, disabled]
   );
 
   const handleRemove = useCallback(
@@ -65,9 +67,9 @@ export function ImageUpload({
           console.error('Failed to delete image:', error);
         }
       }
-      onChange(value.filter((url) => url !== urlToRemove));
+      onChange(validUrls.filter((url) => url !== urlToRemove));
     },
-    [value, onChange, onRemove, disabled]
+    [validUrls, onChange, onRemove, disabled]
   );
 
   const handleDrop = useCallback(
@@ -89,17 +91,17 @@ export function ImageUpload({
     setDragOver(false);
   }, []);
 
-  const canAddMore = value.length < maxImages;
+  const canAddMore = validUrls.length < maxImages;
 
   return (
     <div className={cn('space-y-3', className)}>
       {/* Image previews */}
-      {value.length > 0 && (
+      {validUrls.length > 0 && (
         <div className={cn(
           'grid gap-3',
           maxImages === 1 ? 'grid-cols-1' : 'grid-cols-3'
         )}>
-          {value.map((url, index) => (
+          {validUrls.map((url, index) => (
             <div
               key={url}
               className="relative group aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-50"
@@ -135,7 +137,7 @@ export function ImageUpload({
               ? 'border-blue-500 bg-blue-50'
               : 'border-gray-200 hover:border-gray-300',
             disabled && 'opacity-50 cursor-not-allowed',
-            maxImages > 1 && value.length > 0 ? 'py-4' : ''
+            maxImages > 1 && validUrls.length > 0 ? 'py-4' : ''
           )}
         >
           <input
@@ -157,15 +159,15 @@ export function ImageUpload({
             ) : (
               <>
                 <div className="p-3 bg-gray-100 rounded-full mb-3">
-                  {value.length > 0 ? (
+                  {validUrls.length > 0 ? (
                     <Upload className="w-6 h-6 text-gray-500" />
                   ) : (
                     <ImageIcon className="w-6 h-6 text-gray-500" />
                   )}
                 </div>
                 <p className="text-sm font-medium text-gray-700">
-                  {value.length > 0
-                    ? `Add more (${value.length}/${maxImages})`
+                  {validUrls.length > 0
+                    ? `Add more (${validUrls.length}/${maxImages})`
                     : 'Click or drag to upload'}
                 </p>
                 <p className="text-xs text-gray-500 mt-1">

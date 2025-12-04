@@ -211,7 +211,7 @@ export function BasketSheet({ units = [], storeSettings, categories = [] }: Bask
       ) : (
         <div className="space-y-4">
           {items.map((item) => {
-            const imageUrl = item.product.imageUrl || item.product.images?.[0];
+            const imageUrl = item.product.imageUrl?.trim() || item.product.images?.find(img => img?.trim());
             const itemPrice = item.product.price + (item.variant?.priceModifier || 0);
             return (
               <div

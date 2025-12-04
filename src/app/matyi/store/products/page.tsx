@@ -137,7 +137,7 @@ export default function ProductsPage() {
       const imagesToDelete = [
         product?.imageUrl,
         ...(product?.images || []),
-      ].filter(Boolean) as string[];
+      ].filter((url): url is string => Boolean(url?.trim()));
       
       if (imagesToDelete.length > 0) {
         await deleteImages(imagesToDelete);
@@ -173,11 +173,11 @@ export default function ProductsPage() {
 
   const handleOpenEdit = (product: Product) => {
     setEditingProduct(product);
-    // Combine imageUrl and images array for editing
+    // Combine imageUrl and images array for editing, filtering out empty/whitespace URLs
     const existingImages = [
       product.imageUrl,
       ...(product.images || []),
-    ].filter(Boolean) as string[];
+    ].filter((url): url is string => Boolean(url?.trim()));
     setImageUrls(existingImages);
     setOriginalImageUrls(existingImages);
     setVariants(product.variants || []);
@@ -208,22 +208,24 @@ export default function ProductsPage() {
   };
 
   const onSubmit = async (data: ProductFormValues) => {
+    // Filter out any empty strings before processing
+    const validImageUrls = imageUrls.filter((url) => url && url.trim());
     // First image goes to imageUrl, rest go to images array
-    const imageUrl = imageUrls[0] || '';
-    const images = imageUrls.slice(1);
+    const imageUrl = validImageUrls[0] || '';
+    const images = validImageUrls.slice(1);
     
     const formData = {
       ...data,
       price: Math.round(data.price * 100), // Convert to cents
       imageUrl,
       images,
-      variants: variants.length > 0 ? variants : undefined,
+      variants: variants, // Always send the array, even if empty, to clear variants
     };
 
     // Clean up removed images
     if (editingProduct) {
       const removedImages = originalImageUrls.filter(
-        (url) => !imageUrls.includes(url)
+        (url) => !validImageUrls.includes(url)
       );
       if (removedImages.length > 0) {
         await deleteImages(removedImages);
@@ -390,15 +392,18 @@ export default function ProductsPage() {
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center shrink-0 overflow-hidden">
-                          {(product.imageUrl || product.images?.[0]) ? (
-                            <img
-                              src={product.imageUrl || product.images?.[0]}
-                              alt={product.name}
-                              className="w-10 h-10 object-cover"
-                            />
-                          ) : (
-                            <Package className="w-5 h-5 text-gray-400" />
-                          )}
+                          {(() => {
+                            const validImage = product.imageUrl?.trim() || product.images?.find(img => img?.trim());
+                            return validImage ? (
+                              <img
+                                src={validImage}
+                                alt={product.name}
+                                className="w-10 h-10 object-cover"
+                              />
+                            ) : (
+                              <Package className="w-5 h-5 text-gray-400" />
+                            );
+                          })()}
                         </div>
                         <div>
                           <p className="font-medium text-gray-900 flex items-center gap-2">

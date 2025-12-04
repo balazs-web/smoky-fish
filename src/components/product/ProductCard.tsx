@@ -19,7 +19,9 @@ export function ProductCard({ product, unit, category, onAddToBasket, className 
   const [isHovered, setIsHovered] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  const images = product.images?.length ? product.images : product.imageUrl ? [product.imageUrl] : [];
+  // Filter out empty/invalid image URLs
+  const images = [product.imageUrl, ...(product.images || [])]
+    .filter((url): url is string => Boolean(url?.trim()));
   const hasMultipleImages = images.length > 1;
 
   const formatPrice = (priceInCents: number): string => {
@@ -184,7 +186,7 @@ export function ProductCard({ product, unit, category, onAddToBasket, className 
         {category?.hasApproximateWeight && (
           <div className="bg-amber-500 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
             <Scale className="h-3 w-3" />
-            ~súly
+            ~tömeg
           </div>
         )}
       </div>

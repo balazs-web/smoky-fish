@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendOrderEmails, type OrderData } from "@/lib/email-service";
+import { createInvoice } from "@/lib/invoice-service";
+import { saveOrder } from "@/lib/order-service";
 import { DELIVERY_POSTCODES } from "@/config/deliveryPostcodes";
 
 // Generate a unique order ID
@@ -51,15 +53,35 @@ export async function POST(request: NextRequest) {
       orderDate: new Date(),
     };
 
+    // Create invoice (non-blocking - order succeeds even if invoice fails)
+    let invoiceResult = null;
+    try {
+      invoiceResult = await createInvoice(orderData);
+      if (invoiceResult.success) {
+        console.log(`Invoice created: ${invoiceResult.invoiceId}`);
+      } else {
+        console.warn(`Invoice creation failed: ${invoiceResult.error}`);
+      }
+    } catch (invoiceError) {
+      console.error("Invoice creation error:", invoiceError);
+    }
+
+    // Save order to Firebase (without sensitive customer data)
+    try {
+      await saveOrder(orderData, invoiceResult?.invoiceId);
+      console.log(`Order saved to Firebase: ${orderData.orderId}`);
+    } catch (saveError) {
+      console.error("Failed to save order to Firebase:", saveError);
+      // Don't fail the order if Firebase save fails
+    }
+
     // Send emails
     const emailResults = await sendOrderEmails(orderData);
-
-    // TODO: Save order to Firebase if needed
-    // await saveOrderToFirebase(orderData);
 
     return NextResponse.json({
       success: true,
       orderId: orderData.orderId,
+      invoiceId: invoiceResult?.invoiceId || null,
       emailResults,
       message: "Rendelés sikeresen leadva!",
     });
