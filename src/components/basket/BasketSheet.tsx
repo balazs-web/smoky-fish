@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Minus, Plus, ShoppingCart, Trash2, Package, Loader2, CheckCircle, MapPin, Wine, FileText, X } from "lucide-react";
+import { Minus, Plus, ShoppingCart, Trash2, Package, Loader2, CheckCircle, MapPin, Wine, FileText, X, CreditCard, Building2, Banknote, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -58,6 +58,7 @@ export function BasketSheet({ units = [], storeSettings, categories = [] }: Bask
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [acceptedAge, setAcceptedAge] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<"card" | "transfer" | "cod" | null>(null);
 
   // Check if any item in the cart has 18+ restriction
   const hasAlcoholItems = useMemo(() => {
@@ -115,9 +116,10 @@ export function BasketSheet({ units = [], storeSettings, categories = [] }: Bask
       } else {
         setCurrentStep("basket");
       }
-      // Reset checkboxes
+      // Reset checkboxes and payment method
       setAcceptedTerms(false);
       setAcceptedAge(false);
+      setPaymentMethod(null);
     }, 300);
   };
 
@@ -143,6 +145,12 @@ export function BasketSheet({ units = [], storeSettings, categories = [] }: Bask
         setOrderError("Kérlek töltsd ki az összes kötelező mezőt a számlázási adatoknál!");
         return;
       }
+    }
+
+    // Validate payment method selection
+    if (!paymentMethod) {
+      setOrderError("Kérlek válassz fizetési módot!");
+      return;
     }
 
     // Validate terms acceptance
@@ -173,6 +181,7 @@ export function BasketSheet({ units = [], storeSettings, categories = [] }: Bask
           totalPrice: grandTotal,
           shippingAddress,
           billingAddress,
+          paymentMethod,
         }),
       });
 
@@ -630,6 +639,101 @@ export function BasketSheet({ units = [], storeSettings, categories = [] }: Bask
             </div>
           </div>
         )}
+
+        {/* Payment Method Selection */}
+        <div className="mt-6 pt-4 border-t">
+          <h3 className="font-semibold text-gray-900 mb-4">Fizetési mód</h3>
+          
+          {/* Price Warning */}
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
+            <div className="flex items-start gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-amber-800">Fontos információ</p>
+                <p className="text-xs text-amber-700 mt-0.5">
+                  Egyes termékeink jellegéből adódóan (pl. tömeg alapú árazás) a végső ár kis mértékben eltérhet. A csomagolás után értesítünk a pontos összegről.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            {/* Card Payment */}
+            <label
+              className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors ${
+                paymentMethod === "card"
+                  ? "border-[#1B5E4B] bg-[#1B5E4B]/5"
+                  : "border-gray-200 hover:border-gray-300"
+              }`}
+            >
+              <input
+                type="radio"
+                name="paymentMethod"
+                value="card"
+                checked={paymentMethod === "card"}
+                onChange={() => setPaymentMethod("card")}
+                className="h-4 w-4 text-[#1B5E4B] focus:ring-[#1B5E4B]"
+              />
+              <CreditCard className={`h-5 w-5 ${paymentMethod === "card" ? "text-[#1B5E4B]" : "text-gray-500"}`} />
+              <div className="flex-1">
+                <p className={`font-medium ${paymentMethod === "card" ? "text-[#1B5E4B]" : "text-gray-900"}`}>
+                  Bankkártya
+                </p>
+                <p className="text-xs text-gray-500">Online fizetés kártyával</p>
+              </div>
+            </label>
+
+            {/* Bank Transfer */}
+            <label
+              className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors ${
+                paymentMethod === "transfer"
+                  ? "border-[#1B5E4B] bg-[#1B5E4B]/5"
+                  : "border-gray-200 hover:border-gray-300"
+              }`}
+            >
+              <input
+                type="radio"
+                name="paymentMethod"
+                value="transfer"
+                checked={paymentMethod === "transfer"}
+                onChange={() => setPaymentMethod("transfer")}
+                className="h-4 w-4 text-[#1B5E4B] focus:ring-[#1B5E4B]"
+              />
+              <Building2 className={`h-5 w-5 ${paymentMethod === "transfer" ? "text-[#1B5E4B]" : "text-gray-500"}`} />
+              <div className="flex-1">
+                <p className={`font-medium ${paymentMethod === "transfer" ? "text-[#1B5E4B]" : "text-gray-900"}`}>
+                  Átutalás
+                </p>
+                <p className="text-xs text-gray-500">Előre utalás bankszámlára</p>
+              </div>
+            </label>
+
+            {/* Cash on Delivery */}
+            <label
+              className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors ${
+                paymentMethod === "cod"
+                  ? "border-[#1B5E4B] bg-[#1B5E4B]/5"
+                  : "border-gray-200 hover:border-gray-300"
+              }`}
+            >
+              <input
+                type="radio"
+                name="paymentMethod"
+                value="cod"
+                checked={paymentMethod === "cod"}
+                onChange={() => setPaymentMethod("cod")}
+                className="h-4 w-4 text-[#1B5E4B] focus:ring-[#1B5E4B]"
+              />
+              <Banknote className={`h-5 w-5 ${paymentMethod === "cod" ? "text-[#1B5E4B]" : "text-gray-500"}`} />
+              <div className="flex-1">
+                <p className={`font-medium ${paymentMethod === "cod" ? "text-[#1B5E4B]" : "text-gray-900"}`}>
+                  Utánvétel
+                </p>
+                <p className="text-xs text-gray-500">Fizetés átvételkor készpénzzel vagy kártyával</p>
+              </div>
+            </label>
+          </div>
+        </div>
 
         {/* Terms & Conditions and Age Verification */}
         <div className="mt-6 pt-4 border-t space-y-4">

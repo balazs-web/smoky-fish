@@ -54,6 +54,8 @@ async function sendMailWithRetry(
   throw lastError;
 }
 
+export type PaymentMethodType = "card" | "transfer" | "cod";
+
 export interface OrderData {
   orderId: string;
   items: BasketItem[];
@@ -63,7 +65,15 @@ export interface OrderData {
   shippingAddress: ShippingAddress;
   billingAddress: BillingAddress;
   orderDate: Date;
+  paymentMethod?: PaymentMethodType;
 }
+
+// Payment method labels in Hungarian
+const paymentMethodLabels: Record<PaymentMethodType, string> = {
+  card: "Bankkártya",
+  transfer: "Átutalás",
+  cod: "Utánvétel",
+};
 
 // Format price from cents to HUF string
 const formatPrice = (priceInCents: number): string => {
@@ -218,6 +228,15 @@ export async function sendCustomerOrderConfirmation(
           <span style="font-size: 18px;"><strong>Végösszeg: ${formatPrice(order.totalPrice)}</strong></span>
         </div>
         
+        <!-- Payment Method -->
+        ${order.paymentMethod ? `
+        <div style="background-color: #F5F3EF; padding: 16px; border-radius: 8px; margin: 16px 0;">
+          <h3 style="margin: 0 0 8px 0; color: #1B5E4B;">Fizetési mód</h3>
+          <p style="margin: 0; font-weight: bold;">${paymentMethodLabels[order.paymentMethod]}</p>
+          <p style="margin: 8px 0 0 0; font-size: 12px; color: #666;">Megjegyzés: Egyes termékek jellegéből adódóan (pl. tömeg alapú árazás) a végső ár kis mértékben eltérhet. A csomagolás után értesítünk a pontos összegről.</p>
+        </div>
+        ` : ''}
+        
         <!-- Addresses -->
         ${generateAddressHtml(order.shippingAddress, "Szállítási cím")}
         ${generateBillingHtml(order.billingAddress, order.shippingAddress)}
@@ -313,6 +332,13 @@ export async function sendShopManagerNotification(
         <div style="text-align: right; padding: 16px; background-color: #1B5E4B; color: #fff; border-radius: 8px; margin-bottom: 20px;">
           <span style="font-size: 20px;"><strong>Végösszeg: ${formatPrice(order.totalPrice)}</strong></span>
         </div>
+        
+        <!-- Payment Method -->
+        ${order.paymentMethod ? `
+        <div style="background-color: #C89A63; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+          <p style="margin: 0;"><strong>Fizetési mód:</strong> ${paymentMethodLabels[order.paymentMethod]}</p>
+        </div>
+        ` : ''}
         
         <!-- Addresses -->
         ${generateAddressHtml(order.shippingAddress, "Szállítási cím")}

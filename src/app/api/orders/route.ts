@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendOrderEmails, type OrderData } from "@/lib/email-service";
-import { createInvoice } from "@/lib/invoice-service";
+// import { createInvoice } from "@/lib/invoice-service"; // DISABLED
 import { saveOrder } from "@/lib/order-service";
 import { DELIVERY_POSTCODES } from "@/config/deliveryPostcodes";
 
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     
-    const { items, subtotal, shippingCost, totalPrice, shippingAddress, billingAddress } = body;
+    const { items, subtotal, shippingCost, totalPrice, shippingAddress, billingAddress, paymentMethod } = body;
 
     // Validate required fields
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -51,24 +51,26 @@ export async function POST(request: NextRequest) {
       shippingAddress,
       billingAddress,
       orderDate: new Date(),
+      paymentMethod,
     };
 
-    // Create invoice (non-blocking - order succeeds even if invoice fails)
-    let invoiceResult = null;
-    try {
-      invoiceResult = await createInvoice(orderData);
-      if (invoiceResult.success) {
-        console.log(`Invoice created: ${invoiceResult.invoiceId}`);
-      } else {
-        console.warn(`Invoice creation failed: ${invoiceResult.error}`);
-      }
-    } catch (invoiceError) {
-      console.error("Invoice creation error:", invoiceError);
-    }
+    // DISABLED: szamlazz.hu invoice integration temporarily disabled
+    // To re-enable, uncomment the createInvoice import and the block below:
+    // let invoiceResult = null;
+    // try {
+    //   invoiceResult = await createInvoice(orderData);
+    //   if (invoiceResult.success) {
+    //     console.log(`Invoice created: ${invoiceResult.invoiceId}`);
+    //   } else {
+    //     console.warn(`Invoice creation failed: ${invoiceResult.error}`);
+    //   }
+    // } catch (invoiceError) {
+    //   console.error("Invoice creation error:", invoiceError);
+    // }
 
     // Save order to Firebase (without sensitive customer data)
     try {
-      await saveOrder(orderData, invoiceResult?.invoiceId);
+      await saveOrder(orderData, undefined, paymentMethod);
       console.log(`Order saved to Firebase: ${orderData.orderId}`);
     } catch (saveError) {
       console.error("Failed to save order to Firebase:", saveError);
@@ -81,7 +83,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       orderId: orderData.orderId,
-      invoiceId: invoiceResult?.invoiceId || null,
+      invoiceId: null,
       emailResults,
       message: "Rendelés sikeresen leadva!",
     });

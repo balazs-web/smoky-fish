@@ -16,6 +16,7 @@ import type { OrderData } from "./email-service";
 
 // Order status enum
 export type OrderStatus = "new" | "processing" | "shipped" | "delivered" | "cancelled";
+export type PaymentMethod = "card" | "transfer" | "cod";
 
 // Anonymized order item (no customer data)
 export interface SavedOrderItem {
@@ -39,6 +40,7 @@ export interface SavedOrder {
   totalPrice: number; // in cents
   status: OrderStatus;
   invoiceId?: string;
+  paymentMethod?: PaymentMethod;
   // Only save city/region for basic analytics, NOT full address
   deliveryCity?: string;
   deliveryPostcode?: string;
@@ -60,7 +62,8 @@ const toDate = (timestamp: unknown): Date => {
  */
 export async function saveOrder(
   orderData: OrderData,
-  invoiceId?: string
+  invoiceId?: string,
+  paymentMethod?: PaymentMethod
 ): Promise<SavedOrder> {
   const now = new Date();
 
@@ -87,6 +90,7 @@ export async function saveOrder(
     totalPrice: orderData.totalPrice,
     status: "new",
     invoiceId: invoiceId || undefined,
+    paymentMethod: paymentMethod || undefined,
     // Only city and postcode for delivery area analytics
     deliveryCity: orderData.shippingAddress.city,
     deliveryPostcode: orderData.shippingAddress.postalCode,
