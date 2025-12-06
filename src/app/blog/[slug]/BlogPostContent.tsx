@@ -2,6 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Calendar, Clock, ArrowLeft, Share2, ArrowRight } from 'lucide-react';
 import { Navbar } from '@/components/layout/Navbar';
 import { getBlogPostBySlug, getRelatedPosts } from '@/lib/blog-service';
@@ -20,12 +21,14 @@ function RelatedPostCard({ post }: { post: BlogPost }) {
   return (
     <Link href={`/blog/${post.slug}`} className="group block">
       <article className="bg-white rounded-xl overflow-hidden shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-        <div className="aspect-[16/10] overflow-hidden bg-gray-100">
+        <div className="relative aspect-[16/10] overflow-hidden bg-gray-100">
           {post.mainImageUrl ? (
-            <img
+            <Image
               src={post.mainImageUrl}
               alt={post.title}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              fill
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              sizes="(max-width: 640px) 100vw, 50vw"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-gray-200">
@@ -189,10 +192,13 @@ export default function BlogPostContent({ slug }: { slug: string }) {
       <div className="mx-auto max-w-5xl px-4 sm:px-6 pt-4">
         <div className="relative w-full rounded-2xl overflow-hidden" style={{ height: 'clamp(200px, 30vh, 300px)' }}>
           {post.mainImageUrl && (
-            <img
+            <Image
               src={post.mainImageUrl}
               alt={post.title}
-              className="absolute inset-0 w-full h-full object-cover"
+              fill
+              className="object-cover"
+              sizes="(max-width: 1280px) 100vw, 1280px"
+              priority
             />
           )}
           {/* Gradient fade at bottom */}

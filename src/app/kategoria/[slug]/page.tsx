@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Package, ArrowLeft } from 'lucide-react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
@@ -82,10 +83,13 @@ export default function CategoryPage() {
         {/* Background Image */}
         {category?.imageUrl && (
           <div className="absolute inset-0 h-full">
-            <img
+            <Image
               src={category.imageUrl}
               alt={category.name}
-              className="h-full w-full object-cover"
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 1200px"
+              priority
             />
             <div className="absolute inset-0 bg-black/60" />
           </div>

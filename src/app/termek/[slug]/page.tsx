@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Package, ArrowLeft, Minus, Plus, ChevronLeft, ChevronRight, Scale, Wine, AlertTriangle, Layers, Check } from 'lucide-react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
@@ -161,10 +162,13 @@ export default function ProductPage() {
               <div className="relative aspect-square bg-white rounded-2xl overflow-hidden shadow-sm">
                 {allImages.length > 0 ? (
                   <>
-                    <img
+                    <Image
                       src={allImages[currentImageIndex]}
                       alt={product.name}
-                      className="h-full w-full object-cover"
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 1024px) 100vw, 50vw"
+                      priority
                     />
                     
                     {/* Navigation Arrows */}
@@ -199,16 +203,18 @@ export default function ProductPage() {
                     <button
                       key={index}
                       onClick={() => setCurrentImageIndex(index)}
-                      className={`w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
+                      className={`relative w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
                         currentImageIndex === index
                           ? 'border-[#1B5E4B] shadow-md'
                           : 'border-transparent hover:border-gray-300'
                       }`}
                     >
-                      <img
+                      <Image
                         src={image}
                         alt={`${product.name} - ${index + 1}`}
-                        className="h-full w-full object-cover"
+                        fill
+                        className="object-cover"
+                        sizes="80px"
                       />
                     </button>
                   ))}

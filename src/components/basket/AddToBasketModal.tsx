@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { Check, Minus, Plus, ShoppingCart, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -96,9 +97,11 @@ export function AddToBasketModal({
           {/* Product Image */}
           <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
             {imageUrl ? (
-              <img
+              <Image
                 src={imageUrl}
                 alt={product.name}
+                width={96}
+                height={96}
                 className="h-full w-full object-cover"
               />
             ) : (

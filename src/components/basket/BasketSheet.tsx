@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Image from "next/image";
 import { Minus, Plus, ShoppingCart, Trash2, Package, Loader2, CheckCircle, MapPin, Wine, FileText, X, CreditCard, Building2, Banknote, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -230,9 +231,11 @@ export function BasketSheet({ units = [], storeSettings, categories = [] }: Bask
                 {/* Product Image */}
                 <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
                   {imageUrl ? (
-                    <img
+                    <Image
                       src={imageUrl}
                       alt={item.product.name}
+                      width={80}
+                      height={80}
                       className="h-full w-full object-cover"
                     />
                   ) : (
