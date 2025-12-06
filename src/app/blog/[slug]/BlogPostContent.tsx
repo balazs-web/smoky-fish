@@ -29,6 +29,7 @@ function RelatedPostCard({ post }: { post: BlogPost }) {
               fill
               className="object-cover transition-transform duration-500 group-hover:scale-105"
               sizes="(max-width: 640px) 100vw, 50vw"
+              quality={75}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-gray-200">
@@ -198,6 +199,7 @@ export default function BlogPostContent({ slug }: { slug: string }) {
               fill
               className="object-cover"
               sizes="(max-width: 1280px) 100vw, 1280px"
+              quality={75}
               priority
             />
           )}

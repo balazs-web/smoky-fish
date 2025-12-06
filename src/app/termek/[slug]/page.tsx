@@ -168,6 +168,7 @@ export default function ProductPage() {
                       fill
                       className="object-cover"
                       sizes="(max-width: 1024px) 100vw, 50vw"
+                      quality={75}
                       priority
                     />
                     
@@ -215,6 +216,7 @@ export default function ProductPage() {
                         fill
                         className="object-cover"
                         sizes="80px"
+                        quality={60}
                       />
                     </button>
                   ))}

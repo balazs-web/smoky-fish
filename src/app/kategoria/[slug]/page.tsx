@@ -88,7 +88,8 @@ export default function CategoryPage() {
               alt={category.name}
               fill
               className="object-cover"
-              sizes="(max-width: 768px) 100vw, 1200px"
+              sizes="100vw"
+              quality={75}
               priority
             />
             <div className="absolute inset-0 bg-black/60" />
